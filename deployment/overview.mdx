@@ -1,7 +1,7 @@
 ---
-title: "Deploy NodeForgeCMS to Production"
+title: "NodeForgeCMS Deployment Overview & Getting Started"
 sidebarTitle: "Overview"
-description: "NodeForgeCMS supports Node.js server deployment, static export, and Docker containerization — choose the approach that fits your infrastructure."
+description: "NodeForgeCMS is self-hosted — choose between PM2 + Nginx, Docker Compose, or a custom setup, and own your complete deployment stack."
 ---
 
 NodeForgeCMS is a self-hosted CMS, which means you own the full deployment stack. Whether you're running a single VPS or orchestrating containers in the cloud, this guide walks you through every supported deployment strategy — from choosing your domain topology to selecting the right process manager and reverse proxy setup for your infrastructure.
@@ -37,14 +37,14 @@ This topology is simpler to provision — you only need a single domain and TLS 
 NodeForgeCMS supports three deployment methods. Choose based on your infrastructure and operational preferences.
 
 <CardGroup cols={3}>
+  <Card title="Environment Setup" icon="gear" href="/deployment/environment">
+    Configure database credentials, JWT secrets, Redis connection, and email settings before deploying with any method. Start here if it's your first deployment.
+  </Card>
   <Card title="PM2 + Nginx" icon="server" href="/deployment/nginx">
     Run the Node.js server with PM2 as your process manager and Nginx as a reverse proxy. The recommended approach for VPS and bare-metal servers — battle-tested, lightweight, and easy to operate.
   </Card>
   <Card title="Docker Compose" icon="docker" href="/deployment/docker">
     Spin up NodeForgeCMS along with MySQL and Redis in isolated containers using the included `docker-compose.yml`. Ideal for containerized environments and teams that want reproducible deployments.
-  </Card>
-  <Card title="Environment Setup" icon="gear" href="/deployment/environment">
-    Configure database credentials, JWT secrets, Redis connection, and email settings before deploying with any method. Start here if it's your first deployment.
   </Card>
 </CardGroup>
 

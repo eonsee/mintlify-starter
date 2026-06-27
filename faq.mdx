@@ -1,7 +1,7 @@
 ---
-title: "NodeForgeCMS Frequently Asked Questions"
+title: "NodeForgeCMS FAQ: Setup, API, and Deployment Questions"
 sidebarTitle: "FAQ"
-description: "Answers to common questions about NodeForgeCMS installation, configuration, multilingual content, SEO, and deployment."
+description: "Answers to common NodeForgeCMS questions covering system requirements, Redis, multilingual support, AI search, headless API, and backups."
 ---
 
 NodeForgeCMS is built to be flexible and production-ready, but it's natural to have questions as you get started or scale your deployment. This FAQ covers the most common topics raised by developers and content teams — from system requirements and Redis configuration to multilingual support, headless API usage, and backups. If you don't find what you need here, check the other sections of the documentation or open a support ticket.
@@ -34,6 +34,8 @@ NodeForgeCMS is built to be flexible and production-ready, but it's natural to h
 
   <Accordion title="What's the difference between SSR and SSG mode?">
     **SSR (Server-Side Rendering)** renders each page on demand at request time using the Node.js server. This is ideal for dynamic content, personalisation, and sites that update frequently, and it ensures search engines always receive fresh HTML. **SSG (Static Site Generation)** pre-renders all pages at build time using `pnpm run generate`, producing a fully static output that can be served from a CDN with no Node.js runtime required. SSG offers the best performance and lowest hosting cost for content-heavy sites that don't change in real time, but requires a rebuild and redeploy whenever content changes.
+
+    **Important for SSG builds:** Before running `pnpm run generate`, comment out or remove `nuxt-api-shield` from your `nuxt.config.ts`. The module's rate-limiting intercepts the high volume of internal API requests Nuxt makes during static generation and will cause the build to fail or produce incomplete pages. Re-enable it after generation if you are deploying in a hybrid configuration. See the [Troubleshooting guide](/troubleshooting) for step-by-step instructions.
   </Accordion>
 
   <Accordion title="How does AI search work — is my content sent to a third-party service?">

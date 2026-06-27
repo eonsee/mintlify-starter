@@ -1,7 +1,7 @@
 ---
 title: "Columns API — Manage Content Structure in NodeForgeCMS"
 sidebarTitle: "Columns"
-description: "REST endpoints for listing, retrieving, creating, updating, and deleting content columns. GET endpoints are public; write operations require a Bearer token."
+description: "REST endpoints for listing, retrieving, creating, updating, and deleting content columns in NodeForgeCMS. Write operations require a Bearer token."
 ---
 
 Columns are the top-level structural units of a NodeForgeCMS site. Every piece of content lives inside a column, which maps directly to a navigational section — think "Blog", "About Us", or "Products". Each column has its own URL key, language setting, display order, and SEO metadata, making them the primary way you organise and expose content to visitors. Before you can publish articles, you need at least one column to assign them to.
@@ -42,7 +42,7 @@ GET /api/columns
 |---|---|---|
 | `id` | number | Unique column identifier |
 | `name` | string | Display name shown in navigation |
-| `urlkey` | string | URL-safe path segment (e.g. `/about`) |
+| `urlkey` | string | URL-safe path segment (e.g. `about`) |
 | `sort` | number | Display order — lower numbers appear first |
 | `lang` | string | Language code (e.g. `en`, `zh`) |
 | `seoTitle` | string | SEO meta title for the column page |

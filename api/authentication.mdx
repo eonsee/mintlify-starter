@@ -1,10 +1,10 @@
 ---
-title: "Authenticate with the NodeForgeCMS API"
+title: "API Authentication — JWT Bearer Login for NodeForgeCMS"
 sidebarTitle: "Authentication"
-description: "Get a JWT token by calling POST /api/auth/login, then pass it as a Bearer token in the Authorization header for all write requests."
+description: "Get a JWT token by calling POST /api/auth/login, then pass it as a Bearer token in the Authorization header for all write requests to NodeForgeCMS."
 ---
 
-The NodeForgeCMS API uses **JSON Web Tokens (JWT)** for authentication. Tokens are short-lived, stateless credentials that prove your identity to the API without requiring session state on the server. To authenticate, exchange your username and password for a token via the login endpoint, then attach that token to every subsequent request that requires authorisation. Public read endpoints do not require a token; all write operations (`POST`, `PUT`, `PATCH`, `DELETE`) do.
+The NodeForgeCMS API uses **JSON Web Tokens (JWT)** for authentication. To authenticate, exchange your username and password for a token via the login endpoint, then attach that token to every subsequent request that requires authorisation. Public read endpoints do not require a token; all write operations (`POST`, `PUT`, `PATCH`, `DELETE`) do.
 
 ## Getting a Token
 
@@ -56,7 +56,7 @@ On success, the API returns a `200` response containing your JWT token and basic
 | `data.token` | string | The JWT Bearer token to use in subsequent requests |
 | `data.user.id` | integer | Unique identifier of the authenticated user |
 | `data.user.username` | string | Username of the authenticated user |
-| `data.user.role` | string | Role assigned to the user (e.g. `admin`, `editor`) |
+| `data.user.role` | string | Role assigned to the user (`admin` or `editor`) |
 
 Store the `token` value securely — you'll include it in the `Authorization` header of every authenticated request.
 

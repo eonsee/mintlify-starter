@@ -1,7 +1,7 @@
 ---
-title: "Configure Nginx for NodeForgeCMS"
-sidebarTitle: "Nginx"
-description: "Set up Nginx as a reverse proxy for NodeForgeCMS with configurations for separate-domain and shared-domain deployments."
+title: "Deploy NodeForgeCMS with PM2 and Nginx Reverse Proxy"
+sidebarTitle: "PM2 + Nginx"
+description: "Set up PM2 to manage the NodeForgeCMS Node.js process and configure Nginx as a reverse proxy for separate-domain or shared-domain deployments."
 ---
 
 Nginx acts as the front door to your NodeForgeCMS deployment: it terminates TLS, routes public traffic to the Node.js server running on port 3000, serves the built admin panel as static files, and efficiently handles uploaded media. The configuration differs slightly depending on which [domain topology](/deployment/overview#domain-topology) you chose, so follow the tab that matches your setup.
@@ -184,19 +184,12 @@ Nginx proxies to a Node.js process on port 3000. Use PM2 to manage that process:
 # Install PM2 globally
 npm install -g pm2
 
-# Start the NodeForgeCMS server
+# Build the server and start it with PM2
 cd /path/to/NodeForgeCMS/server
-pm2 start ecosystem.config.js --env production
+pnpm build
+pm2 start pm2.config.cjs
 
-# Save the process list so it restarts on reboot
-pm2 save
-pm2 startup
-```
-
-If the project doesn't include an `ecosystem.config.js`, start the server directly:
-
-```bash
-pm2 start "node index.js" --name nodeforge-server
+# Save the process list so PM2 restarts it on reboot
 pm2 save
 pm2 startup
 ```

@@ -1,7 +1,7 @@
 ---
-title: "NodeForgeCMS REST API Reference Overview"
+title: "NodeForgeCMS REST API — Complete Reference Guide"
 sidebarTitle: "Overview"
-description: "The NodeForgeCMS API is a RESTful JSON API for programmatic content management — create, read, update, and delete content, columns, media, and users."
+description: "Complete reference for the NodeForgeCMS REST API — manage articles, columns, media, users, and AI features with a consistent JSON interface."
 ---
 
 The NodeForgeCMS REST API gives developers full programmatic control over every aspect of their CMS — from publishing articles and managing media assets to administering users and defining content structure. Whether you're building a headless front-end, automating content workflows, integrating a third-party service, or extending NodeForgeCMS with custom tooling, the API provides a consistent, predictable interface to every resource the platform manages.
@@ -88,3 +88,125 @@ JWT Bearer tokens are required for all write operations (`POST`, `PUT`, `PATCH`,
     Administer CMS user accounts — create users, assign roles, update credentials, and manage access permissions.
   </Card>
 </CardGroup>
+
+## AI Endpoints
+
+NodeForgeCMS exposes two AI-powered endpoints for semantic search and content translation. Both require a valid Bearer token.
+
+---
+
+### AI Semantic Search
+
+<api-endpoint method="POST" path="/api/ai/search" />
+
+Performs a semantic search across all published content using natural language. Returns ranked results relevant to the query. **Requires a valid Bearer token.**
+
+```http
+POST /api/ai/search
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "query": "how to configure custom columns",
+  "lang": "en"
+}
+```
+
+#### Request Body
+
+<ParamField body="query" type="string" required>
+  The natural-language search query. The AI engine interprets meaning and intent rather than matching keywords literally.
+</ParamField>
+
+<ParamField body="lang" type="string" required>
+  Language code for the search context (e.g. `en`, `zh`, `fr`). Results are ranked within the specified language corpus.
+</ParamField>
+
+#### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "results": [
+      {
+        "id": 12,
+        "title": "Configuring Content Columns",
+        "summary": "A guide to setting up and customising content columns in NodeForgeCMS.",
+        "score": 0.94
+      },
+      {
+        "id": 7,
+        "title": "Getting Started with NodeForgeCMS",
+        "summary": "An introduction to the core concepts of NodeForgeCMS.",
+        "score": 0.81
+      }
+    ],
+    "total": 2
+  },
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `results` | array | Ranked array of matching article summaries |
+| `results[].id` | number | Article ID |
+| `results[].title` | string | Article title |
+| `results[].summary` | string | Short excerpt from the article |
+| `results[].score` | number | Relevance score between `0` and `1` — higher is more relevant |
+| `total` | number | Total number of results returned |
+
+---
+
+### AI Content Translation
+
+<api-endpoint method="POST" path="/api/ai/translate" />
+
+Translates a block of content from one language to another using the AI translation engine. Useful for automating multi-locale content workflows. **Requires a valid Bearer token.**
+
+```http
+POST /api/ai/translate
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "content": "<p>Welcome to NodeForgeCMS — the modern enterprise CMS.</p>",
+  "sourceLang": "en",
+  "targetLang": "fr"
+}
+```
+
+#### Request Body
+
+<ParamField body="content" type="string" required>
+  The content to translate. Accepts plain text or HTML. HTML tags and structure are preserved in the translated output.
+</ParamField>
+
+<ParamField body="sourceLang" type="string" required>
+  Language code of the input content (e.g. `en`, `zh`, `de`). Must match the actual language of the supplied `content`.
+</ParamField>
+
+<ParamField body="targetLang" type="string" required>
+  Language code of the desired output language (e.g. `fr`, `es`, `ja`). The translated content will be returned in this language.
+</ParamField>
+
+#### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "translatedContent": "<p>Bienvenue sur NodeForgeCMS — le CMS d'entreprise moderne.</p>"
+  },
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `translatedContent` | string | The translated content in the target language. HTML structure is preserved if the input contained HTML. |
+
+<Note>
+  Translation quality depends on the AI model configured in your NodeForgeCMS deployment. Very long content bodies may be subject to token limits — split large articles into sections if you encounter `400` errors.
+</Note>

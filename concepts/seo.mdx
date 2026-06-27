@@ -1,5 +1,5 @@
 ---
-title: "SEO Optimization Built Into NodeForgeCMS"
+title: "SEO in NodeForgeCMS: SSR, SSG, and Metadata Controls"
 sidebarTitle: "SEO"
 description: "NodeForgeCMS delivers SEO-ready pages via SSR and SSG rendering, structured metadata management, and search-engine-friendly URL structures."
 ---
@@ -32,9 +32,9 @@ The SEO benefits of SSG are significant:
 
 SSG is ideal for content that does not change in real time: blogs, documentation, marketing landing pages, portfolios, and product catalogs with infrequent updates.
 
-<Note>
+<Warning>
 **Before running `pnpm run generate` for SSG**, you must remove the `nuxt-api-shield` module from your `nuxt.config.ts` file. The `nuxt-api-shield` module is designed for server runtime environments and is incompatible with static generation. Leaving it in place will cause the build to fail. Simply remove or comment out the module entry, run your generate command, then restore it if you plan to switch back to SSR mode.
-</Note>
+</Warning>
 
 ## When to Use SSR vs. SSG
 

@@ -1,7 +1,7 @@
 ---
-title: "Configure NodeForgeCMS Environment Variables"
+title: "NodeForgeCMS Environment Variables Configuration Guide"
 sidebarTitle: "Environment"
-description: "Set up your NodeForgeCMS server environment with database credentials, JWT secrets, Redis connection, and email settings."
+description: "Set up your NodeForgeCMS server environment: configure database credentials, JWT secrets, Redis connection, and email settings before deploying."
 ---
 
 All runtime configuration for NodeForgeCMS lives in a single `.env` file inside the `server/` directory. This file controls how the Node.js backend connects to MySQL and Redis, how it signs authentication tokens, what domain it serves assets from, and how it dispatches email. Getting these values right before your first deployment is essential — misconfigured variables are the most common source of startup failures.

@@ -1,7 +1,7 @@
 ---
-title: "Deploy NodeForgeCMS with Docker Compose"
+title: "Deploy NodeForgeCMS with Docker Compose (MySQL + Redis)"
 sidebarTitle: "Docker"
-description: "Run NodeForgeCMS in a containerized environment using the included Docker Compose configuration with MySQL and Redis."
+description: "Run NodeForgeCMS in isolated containers using the included Docker Compose configuration with MySQL 8 and Redis 7 — reproducible and fast to set up."
 ---
 
 NodeForgeCMS ships with a production-ready `Dockerfile` and `docker-compose.yml` that orchestrate the CMS server, MySQL 8, and Redis 7 as a single multi-container application. This is the fastest path to a reproducible, isolated deployment — all service dependencies are declared in one file, and a single command brings the entire stack online. If you're running on a container-friendly host or already use Docker in your workflow, this is the recommended deployment path.
@@ -95,9 +95,32 @@ Replace `server/sql/init.sql` with the actual path to your SQL file if it differ
   Do **not** use `docker compose down -v` in production — the `-v` flag removes volumes and will permanently delete your database.
 </Note>
 
+### Build the Admin Panel
+
+The admin panel is a static Vue application that must be compiled and placed where Nginx (or your reverse proxy) can serve it. The build command depends on your [domain topology](/deployment/overview#domain-topology):
+
+<Tabs>
+  <Tab title="Separate Domains">
+    ```bash
+    cd admin
+    pnpm build:prod
+    ```
+
+    Output is written to `admin/dist/`. Point your reverse proxy for `admin.yourdomain.com` at this directory.
+  </Tab>
+  <Tab title="Shared Domain">
+    ```bash
+    cd admin
+    pnpm build:sigle
+    ```
+
+    This variant sets the correct base path so the admin panel is served from `/admin`. Output is written to `admin/dist/`.
+  </Tab>
+</Tabs>
+
 ### Access the Application
 
-Once all services are running and the database is imported, your NodeForgeCMS instance is live. Open your configured `SERVER_HOST` in a browser to see the public site, and navigate to `/admin` (or `admin.yourdomain.com` for separate-domain deployments) to access the admin panel.
+Once all services are running, the database is imported, and the admin panel is built, your NodeForgeCMS instance is live. Open your configured `SERVER_HOST` in a browser to see the public site, and navigate to `/admin` (or `admin.yourdomain.com` for separate-domain deployments) to access the admin panel.
 
 If you haven't yet pointed a domain at the server, you can test locally by visiting `http://localhost:3000`.
 

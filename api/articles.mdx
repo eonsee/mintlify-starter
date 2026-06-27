@@ -1,7 +1,7 @@
 ---
 title: "Articles API — Create and Manage Content in NodeForgeCMS"
 sidebarTitle: "Articles"
-description: "REST endpoints for listing, retrieving, creating, updating, and deleting articles. Supports pagination, filtering by column, and language selection."
+description: "REST endpoints for creating, listing, updating, and deleting NodeForgeCMS articles. Supports pagination, column and language filtering, and publish status."
 ---
 
 Articles are the core content objects in NodeForgeCMS. Every piece of published content — a blog post, a product description, a documentation page — is an article. Articles belong to a [column](/api/columns), carry a language code for multi-locale sites, and can be in either `published` or `draft` state. The list and single-article endpoints are public for published content; all write operations require a Bearer token.
@@ -127,7 +127,7 @@ GET /api/articles/1
 | `coverImage` | string | Server path to the cover image |
 | `columnId` | number | ID of the parent column |
 | `lang` | string | Language code |
-| `status` | string | `published` or `draft` |
+| `status` | string | `published` — visible publicly; `draft` — hidden from public responses |
 | `seoTitle` | string | SEO meta title |
 | `seoDescription` | string | SEO meta description |
 | `createdAt` | string | ISO 8601 creation timestamp |
@@ -186,7 +186,7 @@ Content-Type: application/json
 </ParamField>
 
 <ParamField body="status" type="string">
-  Publication status. Accepted values: `published` or `draft`. Defaults to `draft` if omitted — the article will not appear in public listing responses until explicitly published.
+  Publication status. Accepted values: `published` (visible to the public) or `draft` (hidden from public responses). Defaults to `draft` if omitted — the article will not appear in public listing responses until explicitly set to `published`.
 </ParamField>
 
 <ParamField body="seoTitle" type="string">

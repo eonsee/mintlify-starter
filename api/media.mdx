@@ -1,7 +1,7 @@
 ---
 title: "Media API — Upload and Manage Files in NodeForgeCMS"
 sidebarTitle: "Media"
-description: "REST endpoints for uploading images and files and listing the media library. Upload requires multipart/form-data with a Bearer token."
+description: "REST endpoints for uploading images and files, listing the media library, and deleting assets in NodeForgeCMS. All endpoints require a Bearer token."
 ---
 
 The Media API gives you programmatic access to the NodeForgeCMS media library — the centralised store for all images, documents, and binary files used across your site. You can list existing assets to build custom pickers or integrations, and upload new files directly from your application or CI pipeline. Uploaded files are stored on the server and their paths are returned immediately for use in article `coverImage` fields or any other content reference. All media endpoints require a valid Bearer token.

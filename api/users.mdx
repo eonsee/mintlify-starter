@@ -1,7 +1,7 @@
 ---
-title: "Users API — Manage Admin Users in NodeForgeCMS"
+title: "Users API — Manage Admin Accounts in NodeForgeCMS"
 sidebarTitle: "Users"
-description: "REST endpoints for listing, creating, and managing admin users. All endpoints require a valid Bearer token with admin privileges."
+description: "REST endpoints for listing, creating, updating, and deleting NodeForgeCMS admin user accounts. All endpoints require a Bearer token with admin privileges."
 ---
 
 The Users API lets you manage the admin accounts that have access to the NodeForgeCMS back-end. User accounts are scoped to two roles — `admin` (full access) and `editor` (content-only access) — and are entirely separate from your public-facing site visitors. This API is designed for initial setup, team management, and automated provisioning workflows. **Every endpoint in this section requires a valid Bearer token with admin-level privileges.** Requests authenticated with an editor-level token will be rejected with a `403 Forbidden` response.
@@ -40,7 +40,7 @@ Authorization: Bearer YOUR_TOKEN
 |---|---|---|
 | `id` | number | Unique user identifier |
 | `username` | string | Login username |
-| `role` | string | User role — `admin` or `editor` |
+| `role` | string | User role — `admin` (full access) or `editor` (content access only) |
 | `createdAt` | string | ISO 8601 account creation timestamp |
 
 <Note>
@@ -74,7 +74,7 @@ Content-Type: application/json
 </ParamField>
 
 <ParamField body="password" type="string" required>
-  Login password for the new account. A minimum of **8 characters** is strongly recommended. Passwords are stored as bcrypt hashes and are never returned in API responses.
+  Login password for the new account. A minimum of **8 characters** is strongly recommended. Passwords are stored as secure hashes and are never returned in API responses.
 </ParamField>
 
 <ParamField body="role" type="string" required>
