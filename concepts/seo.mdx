@@ -1,0 +1,83 @@
+---
+title: "SEO Optimization Built Into NodeForgeCMS"
+sidebarTitle: "SEO"
+description: "NodeForgeCMS delivers SEO-ready pages via SSR and SSG rendering, structured metadata management, and search-engine-friendly URL structures."
+---
+
+Search engine visibility is not something you configure after the fact in NodeForgeCMS — it is baked into the platform's architecture from the ground up. The combination of server-side rendering, static generation, structured metadata management, and clean URL design means that every page your team publishes is ready for search engine indexing by default. You don't need a separate SEO plugin, a third-party service, or developer intervention every time a content editor wants to optimize a page. The tools are built in and available directly in the admin panel.
+
+## Server-Side Rendering: Making Your Content Crawlable
+
+When a search engine bot visits a page on a site built with traditional client-side JavaScript frameworks, it often sees a nearly empty HTML shell — the actual content only appears after JavaScript executes, which many crawlers handle imperfectly or with delay. **Server-Side Rendering (SSR)** solves this problem at the infrastructure level.
+
+With SSR enabled on a NodeForgeCMS Nuxt4 frontend, every page request is handled by the server, which fetches the content from the API, renders the complete HTML — including all text, headings, images, and metadata — and sends that finished HTML to the browser (and to any crawling bot). Search engines receive a fully populated page on the very first request, with no JavaScript execution required.
+
+This means:
+- **Googlebot, Bingbot, and other crawlers** can index your content fully and immediately
+- **Metadata and structured data** are present in the initial HTML response, not injected after load
+- **Social media preview cards** (Open Graph, Twitter Cards) work reliably because the metadata is in the page source
+- **Time to first byte** is predictable and fast because content is assembled server-side
+
+SSR is the recommended rendering mode for any content that changes frequently and must be indexed accurately — news articles, product pages, landing pages tied to campaigns, and anything with per-user or per-request dynamic elements.
+
+## Static Site Generation: Pre-Rendered Pages for Maximum Speed
+
+**Static Site Generation (SSG)** takes the performance and SEO benefits of SSR one step further: instead of rendering pages on demand at request time, Nuxt4 renders every page in your site *at build time* and outputs a folder of pure, static HTML files. These files can be served from a CDN with zero server processing overhead.
+
+The SEO benefits of SSG are significant:
+
+- **Instant page loads** — static HTML served from a CDN edge node near the user loads in milliseconds, and Google's Core Web Vitals (LCP, FID, CLS) score exceptionally well
+- **Zero server load** — no database queries or API calls on each page request; the content is already baked into the HTML
+- **Perfect crawler behavior** — search engines receive complete, consistent HTML every time, with no variability from server state or load
+
+SSG is ideal for content that does not change in real time: blogs, documentation, marketing landing pages, portfolios, and product catalogs with infrequent updates.
+
+<Note>
+**Before running `pnpm run generate` for SSG**, you must remove the `nuxt-api-shield` module from your `nuxt.config.ts` file. The `nuxt-api-shield` module is designed for server runtime environments and is incompatible with static generation. Leaving it in place will cause the build to fail. Simply remove or comment out the module entry, run your generate command, then restore it if you plan to switch back to SSR mode.
+</Note>
+
+## When to Use SSR vs. SSG
+
+Choosing the right rendering strategy is one of the most impactful decisions you'll make for site performance and SEO. Use this as a guide:
+
+| Scenario | Recommended Mode |
+|----------|-----------------|
+| News site, frequently updated blog | **SSR** — content changes too often for static builds |
+| Product pages with live inventory | **SSR** — real-time data requires server rendering |
+| Marketing landing pages | **SSG** — static, rarely changes, benefits from CDN speed |
+| Documentation or knowledge base | **SSG** — stable content, speed is paramount |
+| Personalized dashboards or account pages | **CSR** — user-specific, no indexing needed |
+| Mixed site (some dynamic, some static) | **Hybrid** — use SSR for dynamic routes, SSG or CSR for others |
+
+Nuxt4 supports route-level rendering configuration, so you can apply different strategies to different sections of the same site — for example, SSG for your marketing pages and SSR for your news feed.
+
+## Meta Tag Management
+
+Every page and article in NodeForgeCMS has a dedicated **SEO metadata panel** in the admin interface, accessible without writing a line of code. Editors can configure:
+
+- **Page title** — the `<title>` tag shown in browser tabs and search result headlines
+- **Meta description** — the summary text shown beneath the title in search results
+- **Open Graph tags** — `og:title`, `og:description`, `og:image` for rich social media previews on Facebook, LinkedIn, and similar platforms
+- **Twitter Card tags** — optimized preview metadata for Twitter/X shares
+- **Canonical URL** — specify the authoritative URL for a page when duplicate or near-duplicate content exists
+
+These fields are rendered directly into the `<head>` of the server-rendered HTML, ensuring that both search engines and social media crawlers read them from the page source, not from JavaScript execution.
+
+## Clean, Semantic URL Structure
+
+URL structure is a foundational SEO signal. NodeForgeCMS generates clean, hierarchical, human-readable URLs automatically from your Column and content configuration:
+
+```
+yourdomain.com/[column-urlkey]/[article-slug]
+yourdomain.com/news/new-product-launch-2025
+yourdomain.com/about/our-leadership-team
+yourdomain.com/products/enterprise-plan
+```
+
+There are no auto-generated numeric IDs, no query string parameters, and no technology-revealing extensions like `.php` or `.aspx` in your public URLs. This benefits SEO in multiple ways: search engines can infer topic context from URL structure, URLs are more likely to earn anchor text that matches the content, and clean URLs are more shareable and memorable for users.
+
+For multilingual sites, the language prefix is prepended cleanly: `/en/news/article-slug`, `/zh/news/article-slug` — creating separate, indexable URL namespaces per language that allow your international content to rank in the appropriate regional search results.
+
+## Structured Data
+
+NodeForgeCMS supports structured data (schema.org JSON-LD) to help search engines understand the type and relationships of your content — enabling rich results like article carousels, breadcrumb trails, FAQ dropdowns, and product snippets in search result pages. Structured data is injected into the server-rendered HTML, ensuring it is always present when crawlers visit.

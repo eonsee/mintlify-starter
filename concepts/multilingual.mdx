@@ -1,0 +1,74 @@
+---
+title: "Multilingual Content Management in NodeForgeCMS"
+sidebarTitle: "Multilingual"
+description: "NodeForgeCMS natively supports 21 languages with per-language content isolation, internationalized routes, and AI-assisted translation."
+---
+
+NodeForgeCMS treats multilingual content as a first-class feature, not an afterthought. From the moment you install the platform, it is ready to manage content in up to 21 languages simultaneously — each with its own isolated content records, its own URL structure, and its own publishing workflow. Whether you're a business expanding into new markets, a media organization serving global audiences, or a government agency with multilingual compliance requirements, NodeForgeCMS lets you manage all of it from a single admin interface without juggling multiple sites or databases.
+
+## How Multilingual Content Works
+
+At its core, multilingual support in NodeForgeCMS means that **every piece of content exists independently per language**. An article, page, or column entry is not a single record with translation fields bolted on — it is a fully independent content record associated with a specific language. This architecture has important practical implications:
+
+- Publishing a Chinese version of a page does not automatically publish the English version
+- Editing the French title of an article has no effect on the Spanish title
+- You can have a page fully fleshed out in one language while it is still a draft in another
+- Each language's content has its own SEO metadata, slugs, and publication status
+
+This gives editorial teams precise control over what is live in each market and prevents accidental cross-language content pollution that is common in simpler translation-overlay systems.
+
+## Supported Languages
+
+NodeForgeCMS ships with built-in support for **21 languages**, covering the major world languages used in global digital publishing — including Chinese (Simplified and Traditional), English, and major European and Asian languages. Language configuration is handled at the project level, and you can activate only the languages relevant to your audience, keeping the admin interface clean for teams that manage a subset of supported locales.
+
+## Internationalized Routing
+
+When multilingual support is enabled, NodeForgeCMS automatically structures your public URLs to reflect the active language. Each language gets its own URL namespace, making it unambiguous to both users and search engines which language version of a page they are viewing:
+
+| Language | URL Pattern | Example |
+|----------|-------------|---------|
+| English | `/en/[column]/[slug]` | `/en/about/our-story` |
+| Chinese (Simplified) | `/zh/[column]/[slug]` | `/zh/about/our-story` |
+| French | `/fr/[column]/[slug]` | `/fr/about/notre-histoire` |
+| German | `/de/[column]/[slug]` | `/de/about/unsere-geschichte` |
+
+These routes are generated automatically based on your Column structure and the slugs you define per language — no manual routing configuration is required. The Nuxt4 frontend reads the language prefix from the URL and requests the correct language variant from the API, ensuring the entire page — content, navigation, metadata, and UI strings — is served in the appropriate language.
+
+## Content Isolation in Practice
+
+Content isolation means your editorial teams for different language markets can work independently without risk of interference. Consider a global news organization using NodeForgeCMS:
+
+- The English editorial team publishes a breaking news article
+- The Chinese translation team works on their version at their own pace
+- The German team decides not to cover the story at all
+- The French team publishes a localized angle as a separate article
+
+All of this happens within the same admin interface, the same Column structure, and the same database — but each language's content lifecycle is entirely independent. There is no "master language" that others must derive from, though you can use AI-assisted translation (see below) to seed translations quickly when that workflow suits your team.
+
+## AI-Assisted Translation
+
+NodeForgeCMS includes a built-in AI translation feature that dramatically reduces the manual effort of managing multilingual content. From any content editor in the admin panel, you can trigger an automatic translation of the current content into one or more target languages. The AI translation:
+
+- Pre-fills the target language content record with translated text, ready for editorial review
+- Preserves formatting, headings, and structure during translation
+- Handles the full content body, meta title, and meta description fields
+- Supports translation between any two of the 21 supported languages, not just from a single source language
+
+AI translation is designed as a **starting point, not a final product** — your editors review and refine the output before publishing. This hybrid workflow (AI drafts, human review) lets small teams maintain high-quality multilingual content at a scale that would otherwise require large localization teams.
+
+## One Admin Interface, Every Market
+
+The most significant operational advantage of NodeForgeCMS's multilingual architecture over running multiple separate websites is **unified administration**. Instead of maintaining separate CMS installations for each market — each with its own users, plugins, media library, and update cycle — you manage everything from one place:
+
+- **Unified media library** — images and files are shared across languages; you upload once and reference everywhere
+- **Shared Column structure** — your site's navigation architecture is defined once and reflected across all language versions
+- **Single user management** — grant editors access to specific languages without giving them access to content they shouldn't touch
+- **Consolidated analytics and publishing workflows** — see the status of every language version of every piece of content from one dashboard
+
+This dramatically reduces operational overhead, eliminates version drift between market sites, and makes it far easier to enforce brand consistency across regions.
+
+## Learn More
+
+<Tip>
+Ready to enable and configure multilingual support for your project? The [Multilingual Setup guide](/guides/multilingual-setup) walks you through activating languages, configuring internationalized routes, setting up per-language content workflows, and using the AI translation feature.
+</Tip>

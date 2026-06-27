@@ -1,0 +1,295 @@
+---
+title: "Articles API — Create and Manage Content in NodeForgeCMS"
+sidebarTitle: "Articles"
+description: "REST endpoints for listing, retrieving, creating, updating, and deleting articles. Supports pagination, filtering by column, and language selection."
+---
+
+Articles are the core content objects in NodeForgeCMS. Every piece of published content — a blog post, a product description, a documentation page — is an article. Articles belong to a [column](/api/columns), carry a language code for multi-locale sites, and can be in either `published` or `draft` state. The list and single-article endpoints are public for published content; all write operations require a Bearer token.
+
+---
+
+## List Articles
+
+<api-endpoint method="GET" path="/api/articles" />
+
+Returns a paginated list of articles. Supports filtering by column, language, and publication status. This is a **public endpoint** — no authentication is required.
+
+```http
+GET /api/articles?page=1&limit=10&lang=en
+```
+
+### Query Parameters
+
+<ParamField query="page" type="number">
+  Page number to retrieve. Defaults to `1`.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Number of items to return per page. Defaults to `10`.
+</ParamField>
+
+<ParamField query="columnId" type="number">
+  Filter results to articles belonging to the specified column ID.
+</ParamField>
+
+<ParamField query="lang" type="string">
+  Filter results by language code (e.g. `en`, `zh`). Returns articles of all languages when omitted.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by publication status. Accepted values: `published` or `draft`. Unauthenticated requests should use `published`; omitting this parameter returns all accessible articles.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "list": [
+      {
+        "id": 1,
+        "title": "Welcome to NodeForgeCMS",
+        "summary": "An introduction to our new CMS platform",
+        "coverImage": "/uploads/cover.jpg",
+        "columnId": 1,
+        "lang": "en",
+        "status": "published",
+        "createdAt": "2024-01-15T10:00:00Z"
+      }
+    ],
+    "total": 42,
+    "page": 1,
+    "limit": 10
+  },
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `list` | array | Array of article summary objects for the current page |
+| `total` | number | Total number of articles matching the applied filters |
+| `page` | number | Current page number |
+| `limit` | number | Maximum items returned per page |
+
+<Note>
+  The list response returns article **summaries** — the `content` (full HTML body) field is excluded for performance. Fetch a single article by ID to retrieve the full content.
+</Note>
+
+---
+
+## Get Article by ID
+
+<api-endpoint method="GET" path="/api/articles/:id" />
+
+Returns a single article including its full HTML content body. **Published articles are publicly accessible.** Draft articles require a valid Bearer token.
+
+```http
+GET /api/articles/1
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The numeric ID of the article to retrieve.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": 1,
+    "title": "Welcome to NodeForgeCMS",
+    "content": "<p>Full HTML content here...</p>",
+    "summary": "An introduction",
+    "coverImage": "/uploads/cover.jpg",
+    "columnId": 1,
+    "lang": "en",
+    "status": "published",
+    "seoTitle": "Welcome - Our CMS",
+    "seoDescription": "Learn about our platform",
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-16T08:30:00Z"
+  },
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | number | Unique article identifier |
+| `title` | string | Article title |
+| `content` | string | Full HTML body of the article |
+| `summary` | string | Short excerpt shown in listings |
+| `coverImage` | string | Server path to the cover image |
+| `columnId` | number | ID of the parent column |
+| `lang` | string | Language code |
+| `status` | string | `published` or `draft` |
+| `seoTitle` | string | SEO meta title |
+| `seoDescription` | string | SEO meta description |
+| `createdAt` | string | ISO 8601 creation timestamp |
+| `updatedAt` | string | ISO 8601 last-updated timestamp |
+
+---
+
+## Create Article
+
+<api-endpoint method="POST" path="/api/articles" />
+
+Creates a new article. **Requires a valid Bearer token.**
+
+```http
+POST /api/articles
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "title": "Getting Started with NodeForgeCMS",
+  "content": "<p>Here is the full article content...</p>",
+  "summary": "A step-by-step guide to your first NodeForgeCMS setup",
+  "coverImage": "/uploads/getting-started.jpg",
+  "columnId": 1,
+  "lang": "en",
+  "status": "draft",
+  "seoTitle": "Getting Started — NodeForgeCMS",
+  "seoDescription": "Learn how to set up NodeForgeCMS in minutes"
+}
+```
+
+### Request Body
+
+<ParamField body="title" type="string" required>
+  Article title displayed in listings, the article page, and browser tab.
+</ParamField>
+
+<ParamField body="content" type="string" required>
+  Full HTML content body of the article. The CMS rich-text editor outputs standard HTML; you may also supply raw HTML directly.
+</ParamField>
+
+<ParamField body="summary" type="string">
+  Short excerpt (plain text) shown in article listing cards and search previews.
+</ParamField>
+
+<ParamField body="coverImage" type="string">
+  Server-relative path to the article's cover image (e.g. `/uploads/cover.jpg`). Use the [Media API](/api/media) to upload images and obtain a valid path.
+</ParamField>
+
+<ParamField body="columnId" type="number" required>
+  The ID of the column this article belongs to. The column must exist before creating an article.
+</ParamField>
+
+<ParamField body="lang" type="string" required>
+  Language code for the article (e.g. `en`, `zh`, `fr`). Should match the language of the parent column for consistent locale filtering.
+</ParamField>
+
+<ParamField body="status" type="string">
+  Publication status. Accepted values: `published` or `draft`. Defaults to `draft` if omitted — the article will not appear in public listing responses until explicitly published.
+</ParamField>
+
+<ParamField body="seoTitle" type="string">
+  SEO meta title rendered in `<title>` for the article page. Falls back to `title` if omitted.
+</ParamField>
+
+<ParamField body="seoDescription" type="string">
+  SEO meta description rendered in `<meta name="description">` for the article page.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": 43,
+    "title": "Getting Started with NodeForgeCMS",
+    "columnId": 1,
+    "lang": "en",
+    "status": "draft",
+    "createdAt": "2024-01-20T09:00:00Z"
+  },
+  "message": "success"
+}
+```
+
+---
+
+## Update Article
+
+<api-endpoint method="PUT" path="/api/articles/:id" />
+
+Updates an existing article by its numeric ID. **Requires a valid Bearer token.**
+
+```http
+PUT /api/articles/43
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "title": "Getting Started with NodeForgeCMS",
+  "content": "<p>Updated content body...</p>",
+  "status": "published"
+}
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The numeric ID of the article to update.
+</ParamField>
+
+### Request Body
+
+Accepts the same fields as [Create Article](#create-article). Provide all fields you wish to persist — the record will be updated with the supplied values.
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": 43,
+    "title": "Getting Started with NodeForgeCMS",
+    "columnId": 1,
+    "lang": "en",
+    "status": "published",
+    "updatedAt": "2024-01-21T14:22:00Z"
+  },
+  "message": "success"
+}
+```
+
+---
+
+## Delete Article
+
+<api-endpoint method="DELETE" path="/api/articles/:id" />
+
+Permanently deletes an article by its numeric ID. **Requires a valid Bearer token.**
+
+```http
+DELETE /api/articles/43
+Authorization: Bearer YOUR_TOKEN
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The numeric ID of the article to delete.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": null,
+  "message": "success"
+}
+```
+
+<Warning>
+  Article deletion is **permanent and irreversible**. There is no trash or soft-delete mechanism — once deleted, the article and its content cannot be recovered. Consider setting `status` to `draft` to hide content without permanently removing it.
+</Warning>

@@ -1,0 +1,180 @@
+---
+title: "Users API — Manage Admin Users in NodeForgeCMS"
+sidebarTitle: "Users"
+description: "REST endpoints for listing, creating, and managing admin users. All endpoints require a valid Bearer token with admin privileges."
+---
+
+The Users API lets you manage the admin accounts that have access to the NodeForgeCMS back-end. User accounts are scoped to two roles — `admin` (full access) and `editor` (content-only access) — and are entirely separate from your public-facing site visitors. This API is designed for initial setup, team management, and automated provisioning workflows. **Every endpoint in this section requires a valid Bearer token with admin-level privileges.** Requests authenticated with an editor-level token will be rejected with a `403 Forbidden` response.
+
+---
+
+## List Users
+
+<api-endpoint method="GET" path="/api/users" />
+
+Returns all admin user accounts. **Requires an admin Bearer token.**
+
+```http
+GET /api/users
+Authorization: Bearer YOUR_TOKEN
+```
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": [
+    {
+      "id": 1,
+      "username": "admin",
+      "role": "admin",
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | number | Unique user identifier |
+| `username` | string | Login username |
+| `role` | string | User role — `admin` or `editor` |
+| `createdAt` | string | ISO 8601 account creation timestamp |
+
+<Note>
+  Password hashes are **never** returned by any Users API response. User credentials are write-only — they can be set on creation or updated, but never read back.
+</Note>
+
+---
+
+## Create User
+
+<api-endpoint method="POST" path="/api/users" />
+
+Creates a new admin user account. **Requires an admin Bearer token.**
+
+```http
+POST /api/users
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "username": "jane.editor",
+  "password": "securePassword123",
+  "role": "editor"
+}
+```
+
+### Request Body
+
+<ParamField body="username" type="string" required>
+  Login username for the new account. Must be unique across all users — the API will return a `409 Conflict` error if the username is already taken.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Login password for the new account. A minimum of **8 characters** is strongly recommended. Passwords are stored as bcrypt hashes and are never returned in API responses.
+</ParamField>
+
+<ParamField body="role" type="string" required>
+  Access role for the new account. Accepted values:
+  - `admin` — full access to all CMS features, settings, and the Users API.
+  - `editor` — can create, edit, and publish articles and manage media, but cannot access user management or system settings.
+</ParamField>
+
+### Response
+
+Returns the created user object. The `password` field is **not** included in the response.
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": 4,
+    "username": "jane.editor",
+    "role": "editor",
+    "createdAt": "2024-02-10T11:30:00Z"
+  },
+  "message": "success"
+}
+```
+
+---
+
+## Update User
+
+<api-endpoint method="PUT" path="/api/users/:id" />
+
+Updates an existing user account. **Requires an admin Bearer token.** Use this endpoint to change a user's username, reset their password, or change their role.
+
+```http
+PUT /api/users/4
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "username": "jane.smith",
+  "role": "admin"
+}
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The numeric ID of the user to update.
+</ParamField>
+
+### Request Body
+
+Accepts the same fields as [Create User](#create-user). All supplied fields will be updated. Omit `password` if you do not want to change the user's current password.
+
+### Response
+
+Returns the updated user object (password excluded).
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": 4,
+    "username": "jane.smith",
+    "role": "admin",
+    "createdAt": "2024-02-10T11:30:00Z"
+  },
+  "message": "success"
+}
+```
+
+---
+
+## Delete User
+
+<api-endpoint method="DELETE" path="/api/users/:id" />
+
+Permanently deletes a user account. **Requires an admin Bearer token.**
+
+```http
+DELETE /api/users/4
+Authorization: Bearer YOUR_TOKEN
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The numeric ID of the user to delete.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": null,
+  "message": "success"
+}
+```
+
+<Warning>
+  You **cannot delete your own account** while you are logged in. Attempting to delete the account associated with the Bearer token used in the request will return a `403 Forbidden` error. To remove your own account, have another admin user perform the deletion. Additionally, deleting the last remaining `admin` user will lock you out of the CMS entirely — always ensure at least one active admin account exists.
+</Warning>

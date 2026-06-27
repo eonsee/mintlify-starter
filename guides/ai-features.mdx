@@ -1,0 +1,83 @@
+---
+title: "Use AI Search and Translation in NodeForgeCMS"
+sidebarTitle: "AI Features"
+description: "NodeForgeCMS includes AI-powered semantic search and automated content translation to help you manage multilingual sites efficiently."
+---
+
+NodeForgeCMS ships with two AI-powered features that work together to make your content more discoverable and easier to maintain at scale. AI Search lets site visitors find relevant content using natural, conversational queries instead of having to guess exact keywords. AI Translation allows your editorial team to produce high-quality translated drafts in seconds, dramatically reducing the time it takes to publish multilingual content. Both features are built into the platform — no third-party plugins required.
+
+<Note>
+  AI features in NodeForgeCMS require a valid AI API key configured in your environment. Ensure the appropriate API key (e.g., OpenAI API key) is set in your server's environment configuration before using AI Search or AI Translation. See your system administrator or your deployment's `.env` configuration file for the relevant variable names.
+</Note>
+
+---
+
+## AI Search
+
+### How It Works
+
+Traditional CMS search relies on exact keyword matching — a visitor who searches for "how to reset my account" will miss an article titled "Password Recovery Guide" unless those exact words appear in it. NodeForgeCMS's AI Search uses **semantic matching**: it understands the *meaning* and *intent* behind a query and surfaces content that is conceptually relevant, even if it doesn't contain the exact search terms.
+
+Under the hood, the search system generates vector embeddings for your published content and compares them against the embedding of each visitor's query. Results are ranked by semantic similarity, not just keyword frequency.
+
+### For Site Visitors
+
+From a visitor's perspective, AI Search is transparent — they simply type a question or phrase into the search box on your public site and receive a ranked list of relevant results. There is nothing special they need to do to take advantage of the AI capabilities. The smarter results are delivered automatically.
+
+### For Administrators
+
+There is no ongoing configuration required to keep AI Search running once the API key is set up. However, how you structure and write your content directly affects search quality:
+
+- **Use clear, descriptive headings.** The AI uses headings as strong signals for topic relevance.
+- **Write complete sentences in the body.** Bullet-point-heavy content with minimal prose gives the model less context to work with.
+- **Avoid overly ambiguous article titles.** Titles like "Update" or "New Feature" are hard to match semantically — prefer "How to Update Your Billing Information" or "Introducing Real-Time Notifications."
+- **Publish complete articles.** Thin drafts or placeholder content can appear in search results if accidentally published.
+
+---
+
+## AI Translation
+
+### Accessing AI Translation
+
+AI Translation is available directly inside the article editor in the admin panel. You do not need to leave the editing interface to produce a translated draft.
+
+1. Log in to the admin panel and navigate to **Articles**.
+2. Open the article you want to translate by clicking its title or the **Edit** icon.
+3. In the article editor, locate the **AI Translate** panel. Depending on your admin theme, this appears either in the right-hand sidebar or as a collapsible section beneath the body editor.
+
+### Translating an Article
+
+<Steps>
+  <Step title="Select the source language">
+    In the AI Translate panel, choose the **Source Language** — the language the article is currently written in. The system will use this to correctly interpret the content before translating.
+  </Step>
+  <Step title="Select the target language">
+    Choose the **Target Language** from the dropdown — this is the language you want to translate the content into. Only languages that have been enabled in **Settings → Language Settings** will appear here.
+  </Step>
+  <Step title="Run the translation">
+    Click **Translate**. The AI processes the article title and body and returns a translated draft, usually within a few seconds. The translated text populates the title and body fields directly in the editor.
+  </Step>
+  <Step title="Review and edit the translated output">
+    Read through the translation carefully before saving. AI translation is highly accurate for common language pairs but can occasionally:
+    - Mistranslate idiomatic expressions or brand-specific terminology
+    - Produce overly literal phrasing that sounds unnatural in the target language
+    - Miss formatting nuances in complex rich-text content
+
+    Correct any issues directly in the editor. If your organization has a style guide or glossary for a given language, apply those terms during review.
+  </Step>
+  <Step title="Save and publish the translated article">
+    Once you are satisfied with the translation, ensure the **Language** field on the article is set to the target language, assign it to the appropriate column, and click **Save** or **Publish**.
+
+    The translated article will be available at its localized URL (e.g., `/fr/products/product-name`) immediately upon publishing.
+  </Step>
+</Steps>
+
+<Tip>
+  Treat AI translation as a strong first draft, not a finished product. For customer-facing content — especially anything involving legal terms, pricing, product specifications, or sensitive topics — always have a fluent speaker review the output before publishing. A few minutes of human review protects your brand and prevents costly mistranslations from reaching your audience.
+</Tip>
+
+### Supported Language Pairs
+
+AI Translation supports any language pair that your configured AI model supports. For OpenAI-based configurations, this includes most major world languages (English, Spanish, French, German, Portuguese, Chinese, Japanese, Korean, Arabic, and dozens more). Accuracy is generally highest for translations between widely-spoken languages with large training data representation.
+
+For a complete walkthrough of setting up multilingual content — including how language routing works and how to manage per-language content isolation — see the [Multilingual Setup guide](/guides/multilingual-setup).

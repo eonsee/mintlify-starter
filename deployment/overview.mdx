@@ -1,0 +1,65 @@
+---
+title: "Deploy NodeForgeCMS to Production"
+sidebarTitle: "Overview"
+description: "NodeForgeCMS supports Node.js server deployment, static export, and Docker containerization — choose the approach that fits your infrastructure."
+---
+
+NodeForgeCMS is a self-hosted CMS, which means you own the full deployment stack. Whether you're running a single VPS or orchestrating containers in the cloud, this guide walks you through every supported deployment strategy — from choosing your domain topology to selecting the right process manager and reverse proxy setup for your infrastructure.
+
+## Domain Topology
+
+Before deploying, decide how you want to serve your admin panel and public site. NodeForgeCMS supports two topologies:
+
+### Separate Domains
+
+Host the admin panel and public site on independent subdomains:
+
+| Service | URL |
+|---|---|
+| Public site | `https://yourdomain.com` |
+| Admin panel | `https://admin.yourdomain.com` |
+
+This is the most common production pattern. It isolates the admin interface from public traffic, makes it easier to apply separate access controls (e.g. IP allowlisting on the admin subdomain), and allows independent caching policies for each surface.
+
+### Shared Domain
+
+Serve both the admin panel and the public site from the same domain using path-based routing:
+
+| Service | URL |
+|---|---|
+| Public site | `https://yourdomain.com` |
+| Admin panel | `https://yourdomain.com/admin` |
+
+This topology is simpler to provision — you only need a single domain and TLS certificate — making it a practical choice for smaller deployments or internal tools.
+
+## Deployment Methods
+
+NodeForgeCMS supports three deployment methods. Choose based on your infrastructure and operational preferences.
+
+<CardGroup cols={3}>
+  <Card title="PM2 + Nginx" icon="server" href="/deployment/nginx">
+    Run the Node.js server with PM2 as your process manager and Nginx as a reverse proxy. The recommended approach for VPS and bare-metal servers — battle-tested, lightweight, and easy to operate.
+  </Card>
+  <Card title="Docker Compose" icon="docker" href="/deployment/docker">
+    Spin up NodeForgeCMS along with MySQL and Redis in isolated containers using the included `docker-compose.yml`. Ideal for containerized environments and teams that want reproducible deployments.
+  </Card>
+  <Card title="Environment Setup" icon="gear" href="/deployment/environment">
+    Configure database credentials, JWT secrets, Redis connection, and email settings before deploying with any method. Start here if it's your first deployment.
+  </Card>
+</CardGroup>
+
+<Tip>
+  **PM2 + Nginx is recommended for most production deployments.** It gives you fine-grained control over the Node.js process lifecycle, easy zero-downtime restarts, structured log management, and a well-understood Nginx configuration model. If you're deploying to a VPS or dedicated server, start with the [Nginx guide](/deployment/nginx).
+</Tip>
+
+## Deployment Checklist
+
+Before going live, make sure you've completed the following steps regardless of which deployment method you choose:
+
+- [ ] Copy `server/.env.example` to `server/.env` and fill in all required values
+- [ ] Set a strong, random `JWT_SECRET` (at least 32 characters)
+- [ ] Point `SERVER_HOST` and `IMG_HOST` to your production domain
+- [ ] Import the initial database SQL file into your MySQL instance
+- [ ] Build the admin panel for your chosen topology (`pnpm build:prod` or `pnpm build:sigle`)
+- [ ] Configure Nginx (or your reverse proxy of choice) with the appropriate server blocks
+- [ ] Enable HTTPS with a valid TLS certificate (Let's Encrypt / certbot recommended)

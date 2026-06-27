@@ -1,0 +1,211 @@
+---
+title: "Troubleshoot Common NodeForgeCMS Issues"
+sidebarTitle: "Troubleshooting"
+description: "Fix the most common issues encountered when installing, configuring, and running NodeForgeCMS in development and production."
+---
+
+Even with a well-documented setup process, things can go wrong — especially across different operating systems, Node.js versions, and server configurations. This guide covers the most frequently reported issues in NodeForgeCMS deployments, organised by area, so you can diagnose and fix problems quickly. Work through the relevant section below, and if an issue persists, include the full error output from your terminal or browser console when reaching out for support.
+
+---
+
+## Installation Issues
+
+### `pnpm install` fails with dependency errors
+
+**Symptom:** Running `pnpm install` in the project root or `admin/` directory produces errors such as `ENOTSUP`, `Unsupported engine`, or peer dependency conflicts.
+
+**Solution:**
+1. Confirm you are running **Node.js 20.x** — run `node -v` to check. NodeForgeCMS is not tested against Node.js 18.x or 22.x and may produce incompatible native module errors on other versions.
+2. Clear the pnpm cache and retry:
+   ```bash
+   pnpm store prune
+   rm -rf node_modules
+   pnpm install
+   ```
+3. Ensure `pnpm` itself is up to date: `npm install -g pnpm@latest`.
+
+<Note>
+  If you are using a Node version manager (nvm, fnm, volta), make sure the correct version is active in your current shell session before running `pnpm install`.
+</Note>
+
+---
+
+### Database connection error on startup
+
+**Symptom:** The API server fails to start and logs an error such as `Error: connect ECONNREFUSED 127.0.0.1:3306` or `Access denied for user`.
+
+**Solution:**
+1. Verify MySQL 8.x is installed and running: `systemctl status mysql` (Linux) or check MySQL Workbench/Services on Windows.
+2. Open your `.env` file and confirm the following variables are correctly set:
+   ```env
+   DATABASE_HOST=127.0.0.1
+   DATABASE_PORT=3306
+   DATABASE_USER=your_db_user
+   DATABASE_PASSWORD=your_db_password
+   DATABASE_NAME=nodeforge
+   ```
+3. Test the connection manually: `mysql -u your_db_user -p -h 127.0.0.1`.
+4. Ensure the database user has been granted the necessary privileges: `GRANT ALL PRIVILEGES ON nodeforge.* TO 'your_db_user'@'localhost';`
+
+<Warning>
+  Do not use the MySQL `root` user in production. Create a dedicated application user with the minimum required permissions.
+</Warning>
+
+---
+
+### Redis connection error on startup
+
+**Symptom:** The server starts but immediately logs `Error: connect ECONNREFUSED 127.0.0.1:6379` or `ReplyError: NOAUTH Authentication required`.
+
+**Solution:**
+1. Verify Redis 7 is installed and running: `systemctl status redis` or `redis-cli ping` (should return `PONG`).
+2. Check your `.env` for the correct Redis settings:
+   ```env
+   REDIS_HOST=127.0.0.1
+   REDIS_PORT=6379
+   REDIS_PASSWORD=your_redis_password   # leave blank if no auth is configured
+   ```
+3. If Redis requires a password, ensure `REDIS_PASSWORD` is set to match the `requirepass` directive in your `redis.conf`.
+4. If Redis is running on a non-standard port or a remote host, update `REDIS_HOST` and `REDIS_PORT` accordingly.
+
+---
+
+## Admin Panel Issues
+
+### Admin panel at port 4000 won't load
+
+**Symptom:** Navigating to `http://localhost:4000` returns a "connection refused" or blank error page.
+
+**Solution:**
+1. The admin panel is a separate Nuxt4 application that must be started independently. Ensure you have opened a terminal inside the `admin/` directory and run:
+   ```bash
+   cd admin
+   pnpm dev
+   ```
+2. Confirm no other process is occupying port 4000: `lsof -i :4000` (Linux/macOS) or `netstat -ano | findstr :4000` (Windows).
+3. Verify the main API server is also running on port 3000, as the admin panel depends on it for all data.
+
+<Note>
+  In production, the admin panel is served as a built static application. Run `pnpm build` inside `admin/` and point your web server to the generated `admin/.output/public` directory.
+</Note>
+
+---
+
+### Can't log in to the admin panel
+
+**Symptom:** Entering credentials on the login screen returns "Invalid username or password" or the page redirects back to login without feedback.
+
+**Solution:**
+1. The **default credentials** are `admin` / `admin123`. Try these first if you have not changed them.
+2. Ensure the API server is running on port 3000 and is reachable from the browser — open `http://localhost:3000/api/health` to verify.
+3. If you have changed your password and forgotten it, reset it directly in MySQL:
+   ```sql
+   UPDATE users SET password = MD5('newpassword123') WHERE username = 'admin';
+   ```
+   Replace `newpassword123` with your desired password and log in with it immediately, then change it via the admin UI.
+
+<Warning>
+  Change the default `admin` / `admin123` credentials immediately after your first login. Leaving default credentials in place is a critical security risk.
+</Warning>
+
+---
+
+### Admin panel shows a blank page after login
+
+**Symptom:** Login succeeds but the dashboard renders as a completely blank white page with no content or error message visible.
+
+**Solution:**
+1. Open your browser's developer tools (F12) and check the **Console** tab for JavaScript errors. Note the full error message before proceeding.
+2. Confirm the API server is running on port 3000 — many admin views fail silently when API calls return network errors.
+3. Clear your browser cache and local storage, then refresh. Stale cached assets from a previous version can cause rendering failures after an update.
+4. If the issue appeared after a recent update, re-run `pnpm install` in the `admin/` directory and rebuild: `pnpm build`.
+
+---
+
+## Content & Media Issues
+
+### Images not loading after upload
+
+**Symptom:** Images are successfully uploaded via the admin panel but appear as broken links on the public-facing site.
+
+**Solution:**
+1. Open your `.env` file and verify that `IMG_HOST` is set to the publicly accessible base URL of your server, e.g.:
+   ```env
+   IMG_HOST=https://yourdomain.com
+   ```
+2. If you are using Nginx as a reverse proxy, confirm the `/uploads` alias is present in your Nginx server block:
+   ```nginx
+   location /uploads {
+       alias /var/www/nodeforge/uploads;
+   }
+   ```
+3. Check that the `/uploads` directory has the correct read permissions for the web server user (`www-data` or `nginx`).
+
+<Note>
+  In development, `IMG_HOST` is typically `http://localhost:3000`. Remember to update it to your production domain before going live.
+</Note>
+
+---
+
+### Article not appearing on the public site
+
+**Symptom:** An article has been created and saved in the admin panel but does not appear on the public-facing website.
+
+**Solution:**
+1. In the admin panel, open the article and confirm its status is set to **Published** — articles in **Draft** status are never rendered on the public site.
+2. Verify the article has been assigned to an **active, published column** (category). If the parent column is in draft status, all its articles are hidden regardless of their individual status.
+3. If running in SSG mode, the static site must be **regenerated and redeployed** after publishing new content — static files are not updated automatically.
+
+---
+
+## SEO / Static Generation Issues
+
+### `pnpm run generate` fails mid-build
+
+**Symptom:** Running `pnpm run generate` starts but terminates with errors related to rate limiting, request blocking, or missing modules.
+
+**Solution:**
+1. The most common cause is the `nuxt-api-shield` module intercepting the high volume of internal API requests made during static generation. **Remove or comment out `nuxt-api-shield`** from your `nuxt.config.ts` before running generate:
+   ```ts
+   // nuxt.config.ts
+   modules: [
+     // 'nuxt-api-shield',  // <-- disable during static generation
+     '@nuxtjs/i18n',
+   ]
+   ```
+2. Re-add `nuxt-api-shield` after generation is complete if you are deploying in a hybrid mode.
+3. Ensure your API server is running and accessible during the generate process, as Nuxt will fetch live data to build static pages.
+
+<Warning>
+  Do not leave `nuxt-api-shield` disabled in a production SSR environment. It provides important rate-limiting protection against abuse.
+</Warning>
+
+---
+
+### Pages not indexed by search engines
+
+**Symptom:** Pages exist on the site but Google Search Console or other crawlers report them as not indexed, or they appear with "Crawled - currently not indexed".
+
+**Solution:**
+1. Ensure NodeForgeCMS is running in **SSR or SSG mode**, not CSR-only. Client-Side Rendering (CSR) delivers an empty HTML shell to crawlers, which prevents indexing. Check your `nuxt.config.ts` — `ssr: true` must be set.
+2. Verify your `robots.txt` (served from `/public/robots.txt`) is not accidentally blocking crawlers with a `Disallow: /` directive.
+3. Confirm your XML sitemap is being generated and is accessible at `/sitemap.xml`. Submit the sitemap URL directly in Google Search Console to accelerate indexing.
+4. Check that your production server is not serving pages behind HTTP Basic Auth or an IP allowlist that blocks crawler access.
+
+---
+
+## Multilingual Issues
+
+### Translated content not showing at the localized URL
+
+**Symptom:** Content exists in the admin panel in a specific language but navigating to the localized URL (e.g., `/fr/article-slug`) returns a 404 or falls back to the default language.
+
+**Solution:**
+1. In the admin panel, open the article and confirm that the correct **language was selected** when the translated version was created. Each language version is stored independently — saving content in English does not automatically create translations.
+2. Verify the target language is **enabled** in **Admin Panel → Settings → Languages**. Disabled languages are excluded from routing.
+3. Check that the language routing configuration in `nuxt.config.ts` (under `@nuxtjs/i18n`) includes the expected locale code and its URL prefix matches what you are testing.
+4. In SSG mode, re-run `pnpm run generate` after adding or updating translated content to rebuild the localized static pages.
+
+<Note>
+  URL slugs are language-specific in NodeForgeCMS. The slug for the French version of an article can (and often should) differ from the English slug to improve local SEO.
+</Note>

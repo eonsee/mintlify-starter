@@ -1,0 +1,139 @@
+---
+title: "Deploy NodeForgeCMS with Docker Compose"
+sidebarTitle: "Docker"
+description: "Run NodeForgeCMS in a containerized environment using the included Docker Compose configuration with MySQL and Redis."
+---
+
+NodeForgeCMS ships with a production-ready `Dockerfile` and `docker-compose.yml` that orchestrate the CMS server, MySQL 8, and Redis 7 as a single multi-container application. This is the fastest path to a reproducible, isolated deployment — all service dependencies are declared in one file, and a single command brings the entire stack online. If you're running on a container-friendly host or already use Docker in your workflow, this is the recommended deployment path.
+
+<Steps>
+
+### Install Docker and Docker Compose
+
+Make sure Docker Engine and the Docker Compose plugin are installed on your server before proceeding.
+
+**On Ubuntu/Debian:**
+
+```bash
+# Install Docker Engine
+curl -fsSL https://get.docker.com | sh
+
+# Verify installation
+docker --version
+docker compose version
+```
+
+You'll need Docker Engine **20.10+** and Docker Compose **v2.0+**. Refer to the [official Docker installation docs](https://docs.docker.com/engine/install/) for other operating systems.
+
+### Configure Environment Variables
+
+Copy the example environment file and fill in your production values:
+
+```bash
+cp server/.env.example server/.env
+```
+
+Open `server/.env` and set your database credentials, JWT secret, Redis connection, and server host. Pay particular attention to:
+
+- `DATABASE_PASSWORD` — set a strong password; this value must match what MySQL initializes with
+- `JWT_SECRET` — generate a random 32+ character string (see the [Environment guide](/deployment/environment))
+- `SERVER_HOST` and `IMG_HOST` — set to your public domain
+
+See the full [Environment Variables guide](/deployment/environment) for a description of every variable.
+
+### Start All Services
+
+With your `.env` file configured, bring up the full stack:
+
+```bash
+docker compose up -d
+```
+
+This command:
+1. Builds the NodeForgeCMS image from the included `Dockerfile`
+2. Pulls the official MySQL 8 and Redis 7 images
+3. Starts all three containers in the background (`-d` = detached mode)
+4. Creates a dedicated Docker network so the services can communicate
+
+Verify that all containers are running:
+
+```bash
+docker compose ps
+```
+
+You should see `node-forge-cms`, `node-forge-mysql`, and `node-forge-redis` with a status of `Up`.
+
+### Import the Database
+
+On first run, you need to import the initial database schema and seed data into the MySQL container. The project includes a SQL file for this purpose.
+
+Find the MySQL container name, then run the import:
+
+```bash
+# Import the initial SQL dump
+docker compose exec mysql mysql \
+  -u root \
+  -p"${DATABASE_PASSWORD}" \
+  node_forge_cms < server/sql/init.sql
+```
+
+Replace `server/sql/init.sql` with the actual path to your SQL file if it differs. You only need to run this once — on subsequent restarts, MySQL will read from its persisted volume.
+
+<Note>
+  MySQL data is persisted using a named Docker volume, so your database survives container restarts and image updates. To inspect or back up the volume:
+
+  ```bash
+  # List volumes
+  docker volume ls
+
+  # Create a database backup
+  docker compose exec mysql mysqldump \
+    -u root -p"${DATABASE_PASSWORD}" \
+    node_forge_cms > backup.sql
+  ```
+
+  Do **not** use `docker compose down -v` in production — the `-v` flag removes volumes and will permanently delete your database.
+</Note>
+
+### Access the Application
+
+Once all services are running and the database is imported, your NodeForgeCMS instance is live. Open your configured `SERVER_HOST` in a browser to see the public site, and navigate to `/admin` (or `admin.yourdomain.com` for separate-domain deployments) to access the admin panel.
+
+If you haven't yet pointed a domain at the server, you can test locally by visiting `http://localhost:3000`.
+
+</Steps>
+
+---
+
+## Automated Deployment with `deploy.sh`
+
+The project includes a `deploy.sh` script that automates the full build-and-restart cycle — useful for deploying updates without manual steps:
+
+```bash
+# Make the script executable (first time only)
+chmod +x deploy.sh
+
+# Run a deployment
+./deploy.sh
+```
+
+The script typically handles pulling the latest code, rebuilding the Docker image, and restarting the affected containers. Review the script contents before running it on a new server to understand exactly what it does in your specific project version.
+
+---
+
+## Useful Docker Compose Commands
+
+| Task | Command |
+|---|---|
+| Start all services | `docker compose up -d` |
+| Stop all services | `docker compose down` |
+| Restart all services | `docker compose restart` |
+| Restart a single service | `docker compose restart app` |
+| Stream live logs (all services) | `docker compose logs -f` |
+| Stream logs for one service | `docker compose logs -f app` |
+| Rebuild and restart | `docker compose up -d --build` |
+| Open a shell in the app container | `docker compose exec app sh` |
+
+<Tip>
+  Run `docker compose logs -f` immediately after `docker compose up -d` to watch the startup sequence in real time. If the app container exits unexpectedly, the logs will show the exact error — most commonly a misconfigured `.env` value or a database connection failure.
+</Tip>

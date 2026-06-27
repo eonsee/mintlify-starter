@@ -1,47 +1,124 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Get Started with NodeForgeCMS in Minutes"
+sidebarTitle: "Quickstart"
+description: "Set up NodeForgeCMS locally and access the admin dashboard in under 10 minutes with Node.js, MySQL, and Redis."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
-
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+This guide gets you from zero to a fully running NodeForgeCMS instance on your local machine. By the end you'll have the backend server, frontend, and admin dashboard all running — ready for you to log in and start building.
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+
+  <Step title="Check Prerequisites">
+    Before you begin, make sure the following are installed and running on your machine:
+
+    - **Node.js 20.x** — NodeForgeCMS requires Node 20 or later.
+    - **MySQL 8.x** — The primary data store for all CMS content and configuration.
+    - **Redis 7** — Used for session caching and performance optimization.
+    - **pnpm** — The package manager used across both the server and admin packages.
+
+    Confirm your versions before continuing to avoid setup issues.
+  </Step>
+
+  <Step title="Clone the Repository and Install Dependencies">
+    Clone the NodeForgeCMS repository, then install dependencies for both the `server/` and `admin/` packages separately.
 
     ```bash
-    npm install your-package
+    git clone https://github.com/your-org/node-forge-cms.git
+    cd node-forge-cms
     ```
-  </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+
+    Install server dependencies:
 
     ```bash
-    your-cli init
+    cd server
+    pnpm install
     ```
-  </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+
+    Install admin panel dependencies:
 
     ```bash
-    your-cli start
+    cd ../admin
+    pnpm install
     ```
   </Step>
+
+  <Step title="Configure Environment Variables">
+    Create a `.env` file in the `server/` directory. You can copy the provided example file and fill in your values:
+
+    ```bash
+    cp server/.env.example server/.env
+    ```
+
+    Edit `server/.env` with your local configuration:
+
+    ```ini server/.env
+    DATABASE_USERNAME=root
+    DATABASE_PASSWORD=your_password
+    DATABASE_HOST=127.0.0.1
+    DATABASE_PORT=3306
+    DATABASE_DB=node_forge_cms
+
+    JWT_SECRET=your_secret_key
+
+    REDIS_HOST=127.0.0.1
+    REDIS_PORT=6379
+    REDIS_DB=5
+
+    SERVER_HOST=http://127.0.0.1:3000
+    IMG_HOST=http://127.0.0.1:3000
+
+    FORM_USER_EMAIL=
+    FORM_USER_EMAIL_PASSWORD=
+    USER_EMAIL_SERVICE=QQ
+    ```
+
+    Replace `your_password` and `your_secret_key` with your own values. The email fields are optional for local development.
+  </Step>
+
+  <Step title="Initialize the Database">
+    Create the `node_forge_cms` database in MySQL, then import the bundled SQL schema and seed file:
+
+    ```bash
+    mysql -u root -p -e "CREATE DATABASE node_forge_cms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    mysql -u root -p node_forge_cms < server/sql/node_forge_cms.sql
+    ```
+
+    This creates all required tables and inserts default configuration data, including the initial admin user.
+  </Step>
+
+  <Step title="Start the Development Server">
+    From the project root, start the Nuxt4 backend and frontend server:
+
+    ```bash
+    cd server && pnpm dev
+    ```
+
+    The server will start at **http://localhost:3000**. You can visit this URL to see the public-facing site frontend.
+  </Step>
+
+  <Step title="Start the Admin Panel">
+    Open a second terminal and start the admin panel:
+
+    ```bash
+    cd admin && pnpm dev
+    ```
+
+    The admin dashboard will be available at **http://localhost:4000**.
+
+    Log in with the default credentials:
+
+    | Field    | Value       |
+    | -------- | ----------- |
+    | Username | `admin`     |
+    | Password | `admin123`  |
+
+    <Warning>
+      Change the default admin password immediately after your first login. Do not use `admin123` in any environment beyond initial local development.
+    </Warning>
+  </Step>
+
 </Steps>
 
 <Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
-
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+  This quickstart uses development mode for both packages. For production deployment — including PM2 process management, production builds, and shared vs. separate domain configurations — see the [full Installation Guide](/installation).
 </Tip>

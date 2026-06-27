@@ -1,0 +1,151 @@
+---
+title: "Media API — Upload and Manage Files in NodeForgeCMS"
+sidebarTitle: "Media"
+description: "REST endpoints for uploading images and files and listing the media library. Upload requires multipart/form-data with a Bearer token."
+---
+
+The Media API gives you programmatic access to the NodeForgeCMS media library — the centralised store for all images, documents, and binary files used across your site. You can list existing assets to build custom pickers or integrations, and upload new files directly from your application or CI pipeline. Uploaded files are stored on the server and their paths are returned immediately for use in article `coverImage` fields or any other content reference. All media endpoints require a valid Bearer token.
+
+---
+
+## List Media Files
+
+<api-endpoint method="GET" path="/api/media" />
+
+Returns a paginated list of all files in the media library. **Requires a valid Bearer token.**
+
+```http
+GET /api/media?page=1&limit=20
+Authorization: Bearer YOUR_TOKEN
+```
+
+### Query Parameters
+
+<ParamField query="page" type="number">
+  Page number to retrieve. Defaults to `1`.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Number of items to return per page. Defaults to `10`.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "list": [
+      {
+        "id": 1,
+        "filename": "hero-image.jpg",
+        "path": "/uploads/hero-image.jpg",
+        "size": 245760,
+        "mimeType": "image/jpeg",
+        "createdAt": "2024-01-15T10:00:00Z"
+      }
+    ],
+    "total": 24
+  },
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | number | Unique media file identifier |
+| `filename` | string | Original filename as stored on the server |
+| `path` | string | Server-relative path to the file (use this in article `coverImage` fields) |
+| `size` | number | File size in bytes |
+| `mimeType` | string | MIME type of the file (e.g. `image/jpeg`, `image/png`) |
+| `createdAt` | string | ISO 8601 upload timestamp |
+| `total` | number | Total number of files in the media library |
+
+---
+
+## Upload a File
+
+<api-endpoint method="POST" path="/api/media/upload" />
+
+Uploads a new file to the media library. **Requires a valid Bearer token.** The request must be sent as `multipart/form-data` with the binary file attached under the `file` field.
+
+```http
+POST /api/media/upload
+Authorization: Bearer YOUR_TOKEN
+Content-Type: multipart/form-data
+
+file: <binary file data>
+```
+
+### cURL Example
+
+```bash
+curl -X POST https://yourdomain.com/api/media/upload \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "file=@/path/to/image.jpg"
+```
+
+### Request Body
+
+<ParamField body="file" type="file" required>
+  The binary file to upload, sent as a `multipart/form-data` field named `file`. The filename and MIME type are inferred from the submitted file.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": 25,
+    "filename": "image.jpg",
+    "path": "/uploads/image.jpg",
+    "url": "https://yourdomain.com/uploads/image.jpg"
+  },
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | number | Unique ID assigned to the new media record |
+| `filename` | string | Stored filename (may be normalised or de-duplicated by the server) |
+| `path` | string | Server-relative path — use this value in article `coverImage` and other content fields |
+| `url` | string | Fully-qualified public URL to access the uploaded file directly |
+
+<Note>
+  **Supported file types:** JPEG (`.jpg`, `.jpeg`), PNG (`.png`), GIF (`.gif`), and WebP (`.webp`). Uploads of unsupported MIME types will be rejected with a `400` error. The default maximum file size is **10 MB** per upload — contact your system administrator to adjust this limit in the server configuration. Large images are not automatically resized; optimise images before uploading for best front-end performance.
+</Note>
+
+---
+
+## Delete a Media File
+
+<api-endpoint method="DELETE" path="/api/media/:id" />
+
+Permanently removes a file from the media library and deletes it from the server filesystem. **Requires a valid Bearer token.**
+
+```http
+DELETE /api/media/25
+Authorization: Bearer YOUR_TOKEN
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The numeric ID of the media file to delete.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": null,
+  "message": "success"
+}
+```
+
+<Warning>
+  Deleting a media file **removes it from the filesystem immediately**. Any articles or pages that reference the deleted file's `path` will display broken images. Check all content referencing the file before deleting it.
+</Warning>

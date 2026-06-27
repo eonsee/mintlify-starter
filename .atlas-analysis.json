@@ -1,13 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
+  "projectType": "framework",
+  "projectName": "NodeForgeCMS",
+  "projectDescription": "An enterprise-grade modern content management system built on Nuxt4 + Node.js + MySQL, designed for corporate websites, multilingual content portals, and product showcases with built-in AI search and translation.",
   "theme": "luma",
-  "name": "NodeForgeCMS",
-  "colors": {
-    "primary": "#2563EB",
-    "light": "#60A5FA",
-    "dark": "#1D4ED8"
-  },
-  "favicon": "/favicon.svg",
+  "primaryColor": "#2563EB",
+  "lightColor": "#60A5FA",
+  "darkColor": "#1D4ED8",
   "navigation": {
     "tabs": [
       {
@@ -81,22 +79,30 @@
       }
     ]
   },
-  "navbar": {
-    "links": [
-      {
-        "label": "GitHub",
-        "href": "https://github.com/eonsee/node-forge-cms"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Live Demo",
-      "href": "http://node-forge.yinchunyu.com/admin/"
-    }
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/eonsee"
-    }
-  }
+  "keyFeatures": [
+    "Flexible column management with dynamic URL configuration",
+    "SSR/SSG dual rendering for SEO optimization",
+    "Built-in support for 21 languages with per-language content isolation",
+    "AI-powered semantic search and content retrieval",
+    "AI-driven multilingual content translation",
+    "Role-based access control with permission management",
+    "RESTful API for third-party integration and custom development",
+    "Decoupled frontend/backend architecture for stable iteration",
+    "Docker and PM2 deployment support"
+  ],
+  "publicApiSurface": [
+    "GET /api/columns — list all content columns",
+    "GET /api/columns/:urlkey — get column by URL key",
+    "GET /api/articles — list articles with pagination",
+    "GET /api/articles/:id — get article detail",
+    "POST /api/articles — create article",
+    "PUT /api/articles/:id — update article",
+    "DELETE /api/articles/:id — delete article",
+    "POST /api/auth/login — admin authentication",
+    "GET /api/media — list uploaded media files",
+    "POST /api/media/upload — upload media file",
+    "GET /api/users — list admin users",
+    "POST /api/ai/search — AI semantic search",
+    "POST /api/ai/translate — AI content translation"
+  ]
 }

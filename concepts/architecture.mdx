@@ -1,0 +1,69 @@
+---
+title: "NodeForgeCMS Architecture: How It Works"
+sidebarTitle: "Architecture"
+description: "NodeForgeCMS uses a decoupled frontend/backend design with a Nuxt4 server, Vue 3 admin panel, MySQL database, and Redis cache."
+---
+
+NodeForgeCMS is built on a modern, decoupled architecture that separates content management from content delivery. This design means your editorial team, developers, and end users each interact with a purpose-built layer — giving you the flexibility to update your frontend presentation, backend logic, or content independently, without one change breaking another. Whether you're running a high-traffic news portal, a multilingual corporate site, or a product catalog, understanding these three layers will help you get the most out of the platform.
+
+## The Three Layers You Work With
+
+### 1. The Public-Facing Website (Nuxt4 Frontend)
+
+The public website is what your visitors see. It is powered by **Nuxt4**, a full-stack framework built on Vue 3, and it handles everything from routing and page rendering to SEO metadata. Nuxt4 fetches content from the NodeForgeCMS API and renders it into fast, SEO-friendly HTML pages. You can choose how each section of your site is rendered — at build time, on the server, or in the browser — depending on your performance and SEO requirements.
+
+### 2. The Admin Panel (Vue 3 Interface)
+
+The admin panel is your content command center. Accessible at `/admin` or on a separate domain in production setups, it is a Vue 3 single-page application that gives editors, authors, and administrators a clean interface for creating pages, managing columns, uploading media, configuring SEO metadata, and handling users. No code changes are needed for day-to-day content operations — everything is managed through this interface.
+
+### 3. The RESTful API
+
+The API is the bridge between your content and the outside world. When the admin panel saves an article, it goes to the API. When the Nuxt4 frontend needs to render a page, it calls the API. Built on Node.js and backed by a MySQL database and Redis cache, the API is fast, stateless, and usable by any HTTP client — meaning you can also power mobile apps, third-party integrations, or headless deployments from the same content source.
+
+## How Content Flows Through the System
+
+From the moment an editor hits **Publish** to the moment a visitor reads the page, content moves through a clear, predictable path:
+
+<Note>
+**Content flow at a glance:**
+
+1. **Author** creates or edits content in the **Admin Panel**
+2. Content is saved to the **MySQL database** via the **REST API**
+3. Frequently accessed data is cached in **Redis** for performance
+4. The **Nuxt4 frontend** requests content from the **API** at build time (SSG) or request time (SSR/CSR)
+5. The rendered page is delivered to the **visitor's browser**
+</Note>
+
+Because the frontend and backend communicate exclusively through the API, you can update your site's visual design without touching the database, or migrate your frontend framework entirely without changing how content is stored.
+
+## The Decoupled Design Advantage
+
+Traditional monolithic CMS platforms tightly couple the database, business logic, and HTML templates into one codebase. NodeForgeCMS takes a different approach: the frontend (Nuxt4) and backend (Node.js API + MySQL) are independent services that communicate over HTTP. This means:
+
+- **Frontend updates are isolated** — redesigning your theme or switching page layouts has zero impact on the API or database.
+- **Backend updates are isolated** — upgrading the API, adding new content types, or switching your caching strategy doesn't require frontend redeployments.
+- **Multiple frontends are possible** — the same API can serve a web frontend, a mobile app, and a partner integration simultaneously.
+- **Teams can work in parallel** — frontend developers and backend engineers aren't blocked by each other's release cycles.
+
+## Rendering Modes
+
+NodeForgeCMS supports three rendering strategies through Nuxt4, and you can mix them within a single project:
+
+| Mode | How It Works | Best For |
+|------|-------------|----------|
+| **SSR** (Server-Side Rendering) | Pages are rendered on the server for each request and sent as complete HTML | News sites, product pages, any content that changes frequently and needs to be indexed by search engines |
+| **SSG** (Static Site Generation) | Pages are pre-rendered at build time into static HTML files | Blogs, landing pages, documentation — anything that prioritizes raw speed and CDN cacheability |
+| **CSR** (Client-Side Rendering) | The browser fetches and renders content at runtime | Highly dynamic or personalized views where SEO is less critical |
+
+Choosing the right rendering mode for each route is one of the most impactful performance and SEO decisions you'll make. See the [SEO guide](/concepts/seo) for recommendations on when to use SSR vs. SSG.
+
+## Learn More
+
+<CardGroup cols={2}>
+  <Card title="Content Columns" icon="columns-3" href="/concepts/columns">
+    Understand how Columns structure your site's navigation, URL paths, and content hierarchy — all without touching code.
+  </Card>
+  <Card title="Multilingual Support" icon="earth-americas" href="/concepts/multilingual">
+    Learn how NodeForgeCMS handles per-language content isolation, internationalized routes, and AI-assisted translation.
+  </Card>
+</CardGroup>

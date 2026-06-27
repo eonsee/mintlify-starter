@@ -1,0 +1,123 @@
+---
+title: "Authenticate with the NodeForgeCMS API"
+sidebarTitle: "Authentication"
+description: "Get a JWT token by calling POST /api/auth/login, then pass it as a Bearer token in the Authorization header for all write requests."
+---
+
+The NodeForgeCMS API uses **JSON Web Tokens (JWT)** for authentication. Tokens are short-lived, stateless credentials that prove your identity to the API without requiring session state on the server. To authenticate, exchange your username and password for a token via the login endpoint, then attach that token to every subsequent request that requires authorisation. Public read endpoints do not require a token; all write operations (`POST`, `PUT`, `PATCH`, `DELETE`) do.
+
+## Getting a Token
+
+Send a `POST` request to `/api/auth/login` with your credentials in the request body.
+
+### Request Body Parameters
+
+<ParamField body="username" type="string" required>
+  Your NodeForgeCMS admin username.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Your NodeForgeCMS admin password.
+</ParamField>
+
+### Login Request
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "your_password"
+}
+```
+
+### Successful Response
+
+On success, the API returns a `200` response containing your JWT token and basic information about the authenticated user:
+
+```json
+{
+  "code": 200,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": 1,
+      "username": "admin",
+      "role": "admin"
+    }
+  },
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `data.token` | string | The JWT Bearer token to use in subsequent requests |
+| `data.user.id` | integer | Unique identifier of the authenticated user |
+| `data.user.username` | string | Username of the authenticated user |
+| `data.user.role` | string | Role assigned to the user (e.g. `admin`, `editor`) |
+
+Store the `token` value securely — you'll include it in the `Authorization` header of every authenticated request.
+
+## Using the Token
+
+Once you have a token, pass it in the `Authorization` header as a **Bearer token** on every request that requires authentication:
+
+```http
+GET /api/articles
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### curl Example
+
+```bash
+curl -X GET https://yourdomain.com/api/articles \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+Replace `YOUR_TOKEN` with the full token string returned from the login endpoint. The `Bearer ` prefix (with the trailing space) is required.
+
+<Note>
+  Never expose your token in client-side code, public repositories, or logs. Treat it with the same care as a password. If a token is compromised, re-authenticate to obtain a new one.
+</Note>
+
+## Token Expiry
+
+Tokens expire after a configured period defined in your NodeForgeCMS server settings. When a token expires, the API will reject it with a `401 Unauthorized` response:
+
+```json
+{
+  "code": 401,
+  "message": "Token expired"
+}
+```
+
+When this happens, re-authenticate by calling `POST /api/auth/login` again with your credentials to obtain a fresh token. There is no refresh-token mechanism — each new session requires a full login.
+
+## Error Responses
+
+| Code | Error | Description |
+|---|---|---|
+| `401` | Unauthorized | The `Authorization` header is missing, the token is malformed, or the token has expired. |
+| `403` | Forbidden | The token is valid and the user is authenticated, but the user's role does not have permission to perform the requested operation. |
+
+### 401 Example — Missing or Invalid Token
+
+```json
+{
+  "code": 401,
+  "message": "Unauthorized: invalid or missing token"
+}
+```
+
+### 403 Example — Insufficient Permissions
+
+```json
+{
+  "code": 403,
+  "message": "Forbidden: you do not have permission to perform this action"
+}
+```
+
+If you receive a `403`, check that the authenticated user has the appropriate role for the operation. Certain endpoints — such as user administration — may be restricted to users with the `admin` role only.

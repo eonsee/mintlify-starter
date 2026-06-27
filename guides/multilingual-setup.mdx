@@ -1,0 +1,87 @@
+---
+title: "Set Up Multiple Languages in NodeForgeCMS"
+sidebarTitle: "Multilingual Setup"
+description: "Enable and configure multilingual content in NodeForgeCMS to reach global audiences from a single admin interface."
+---
+
+NodeForgeCMS was built with global audiences in mind. You can publish and maintain content in as many languages as you need — all from a single admin panel, without managing separate sites or deployments. Each language gets its own URL-prefixed routes, its own content entries, and can be managed independently. Whether you are running a bilingual regional site or a fully globalized enterprise platform, the multilingual system scales with you.
+
+<Note>
+  The default language for your site is set in **System Settings → General → Default Language**. The default language is served at the root URL (e.g., `https://yoursite.com/about`) while additional languages use a URL prefix (e.g., `https://yoursite.com/zh/about`). Make sure the correct default language is configured before you start publishing content.
+</Note>
+
+## Setting Up Multiple Languages
+
+<Steps>
+  <Step title="Enable languages in admin settings">
+    Log in to the admin panel and navigate to **Settings → Language Settings** (or **Localization** depending on your version). You will see a list of available languages. Toggle on each language you want to support, then click **Save**. Enabled languages immediately become available in the article editor and the admin language selector.
+  </Step>
+  <Step title="Create content in the primary language">
+    Start by building out your content in your site's default language. Navigate to **Articles**, click **+ New Article**, and write your content as normal. Select the **default language** from the language selector in the article form, assign a column, and publish.
+
+    Having a complete primary-language version of each article first gives you a clear source to translate from and ensures your site's core experience is solid before expanding to additional languages.
+  </Step>
+  <Step title="Switch the admin language selector to your target language">
+    At the top of the admin panel (or within the article editor), locate the **Language** selector dropdown. Switch it from your default language to the language you want to create content for — for example, switch from *English* to *Chinese (Simplified)*.
+
+    The admin interface will now show content filtered to the selected language. You will notice that articles you created in English are not listed here — each language maintains its own independent content list.
+  </Step>
+  <Step title="Create or translate content for the target language">
+    With the target language selected, create a new article for the translated version:
+
+    - Click **+ New Article**.
+    - Enter the translated title and body content.
+    - Assign the article to the same column as the original.
+    - Ensure the correct language is selected in the language field.
+
+    You can write the translation manually, or use NodeForgeCMS's built-in AI translation tool to generate a starting draft automatically. See [AI Features](/guides/ai-features) for step-by-step instructions on AI-assisted translation.
+  </Step>
+  <Step title="Verify the translated page at its localized URL">
+    After saving and publishing the translated article, open a new browser tab and navigate to the localized URL. The URL format follows this pattern:
+
+    ```
+    https://yoursite.com/{language-code}/{column-urlkey}/{article-slug}
+    ```
+
+    For example, a Chinese translation of an "About Us" article in the `about` column would appear at:
+
+    ```
+    https://yoursite.com/zh/about/about-us
+    ```
+
+    Confirm the page loads correctly, the content displays as expected, and any language-specific formatting (e.g., right-to-left text, CJK characters) renders properly.
+  </Step>
+</Steps>
+
+## How Language Routing Works
+
+NodeForgeCMS uses a **URL prefix strategy** for language routing. Each non-default language gets a short ISO code prepended to its URL paths:
+
+| Language | URL Pattern | Example |
+|---|---|---|
+| English (default) | `/column/article` | `/news/launch-announcement` |
+| Chinese Simplified | `/zh/column/article` | `/zh/news/launch-announcement` |
+| French | `/fr/column/article` | `/fr/news/launch-announcement` |
+| Spanish | `/es/column/article` | `/es/news/launch-announcement` |
+
+The language code used in the URL is determined by the language configuration in **Settings → Language Settings**. The routing is handled automatically by NodeForgeCMS — you do not need to configure URL rewrites or routing rules manually.
+
+## Using AI Translation
+
+For sites with large volumes of content, manually translating every article is time-consuming. NodeForgeCMS includes AI-powered translation to accelerate the process:
+
+1. Open the article you want to translate (in any language) in the article editor.
+2. Locate the **AI Translate** panel — usually in the right-hand sidebar or below the body editor.
+3. Select the **source language** (the language the article is currently written in).
+4. Select the **target language** (the language you want to translate into).
+5. Click **Translate**. The AI will generate a translated version of the title and body content.
+6. Review the output carefully, make any corrections, and adjust phrasing to sound natural.
+7. Save the translated article as a new language entry.
+
+For full details on configuring and using AI features, see the [AI Features guide](/guides/ai-features).
+
+## Content Isolation Between Languages
+
+<Tip>
+  Each language version of an article is completely independent. Editing the English version of an article does **not** automatically update the French or Chinese versions. This is intentional — it gives you full control over the exact phrasing and tone of each language version. It also means you are responsible for keeping translations in sync when source content changes. A good workflow is to maintain a "last translated" date in the article notes so editors know when a re-translation may be needed.
+</Tip>

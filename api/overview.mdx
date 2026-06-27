@@ -1,0 +1,90 @@
+---
+title: "NodeForgeCMS REST API Reference Overview"
+sidebarTitle: "Overview"
+description: "The NodeForgeCMS API is a RESTful JSON API for programmatic content management — create, read, update, and delete content, columns, media, and users."
+---
+
+The NodeForgeCMS REST API gives developers full programmatic control over every aspect of their CMS — from publishing articles and managing media assets to administering users and defining content structure. Whether you're building a headless front-end, automating content workflows, integrating a third-party service, or extending NodeForgeCMS with custom tooling, the API provides a consistent, predictable interface to every resource the platform manages.
+
+<Note>
+  The NodeForgeCMS API is designed for developers extending or integrating NodeForgeCMS into their own applications and workflows. Familiarity with REST conventions and JSON is assumed throughout this reference.
+</Note>
+
+## Base URL
+
+All API endpoints are relative to the following base URL:
+
+| Environment | Base URL |
+|---|---|
+| Production | `https://yourdomain.com/api` |
+| Development | `http://localhost:3000/api` |
+
+Replace `yourdomain.com` with the domain of your NodeForgeCMS deployment. Every path in this reference is appended to this base URL — for example, `GET /api/articles` resolves to `https://yourdomain.com/api/articles` in production.
+
+## Request & Response Format
+
+All requests and responses use JSON. Every request that sends a body must include the `Content-Type: application/json` header, and every response from the API will carry `Content-Type: application/json`.
+
+```http
+Content-Type: application/json
+```
+
+### Standard Response Envelope
+
+Every successful API response is wrapped in a consistent envelope:
+
+```json
+{
+  "code": 200,
+  "data": { ... },
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `code` | integer | HTTP status code mirrored in the response body |
+| `data` | object \| array | The requested or mutated resource(s) |
+| `message` | string | Human-readable status string, typically `"success"` |
+
+### Error Responses
+
+When a request cannot be fulfilled, the API returns an error envelope. The `data` field is omitted:
+
+```json
+{
+  "code": 404,
+  "message": "Article not found"
+}
+```
+
+Common error codes:
+
+| Code | Meaning |
+|---|---|
+| `400` | Bad Request — malformed or missing parameters |
+| `401` | Unauthorized — missing or invalid JWT token |
+| `403` | Forbidden — valid token but insufficient permissions |
+| `404` | Not Found — the requested resource does not exist |
+| `500` | Internal Server Error — unexpected server-side failure |
+
+## Authentication
+
+JWT Bearer tokens are required for all write operations (`POST`, `PUT`, `PATCH`, `DELETE`). Some read endpoints (`GET`) are publicly accessible without a token — these are noted individually in the endpoint reference. See the [Authentication guide](/api/authentication) for full details on obtaining and using tokens.
+
+## Endpoint Groups
+
+<CardGroup cols={2}>
+  <Card title="Columns" icon="table-columns" href="/api/columns">
+    Define and manage the content structure of your CMS — create custom column types, configure fields, and control how content is organised.
+  </Card>
+  <Card title="Articles" icon="newspaper" href="/api/articles">
+    Create, read, update, and delete article content. Supports filtering, pagination, and publishing state management.
+  </Card>
+  <Card title="Media" icon="photo-film" href="/api/media">
+    Upload and manage image and file assets. Retrieve media metadata and integrate assets into your content programmatically.
+  </Card>
+  <Card title="Users" icon="users" href="/api/users">
+    Administer CMS user accounts — create users, assign roles, update credentials, and manage access permissions.
+  </Card>
+</CardGroup>

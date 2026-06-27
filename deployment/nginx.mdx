@@ -1,0 +1,212 @@
+---
+title: "Configure Nginx for NodeForgeCMS"
+sidebarTitle: "Nginx"
+description: "Set up Nginx as a reverse proxy for NodeForgeCMS with configurations for separate-domain and shared-domain deployments."
+---
+
+Nginx acts as the front door to your NodeForgeCMS deployment: it terminates TLS, routes public traffic to the Node.js server running on port 3000, serves the built admin panel as static files, and efficiently handles uploaded media. The configuration differs slightly depending on which [domain topology](/deployment/overview#domain-topology) you chose, so follow the tab that matches your setup.
+
+Before configuring Nginx, make sure:
+- Nginx is installed (`nginx -v` should return a version)
+- Your Node.js server is running via PM2 on port `3000`
+- You've built the admin panel for your topology (see build commands below)
+- You've replaced `/path/to/NodeForgeCMS` with the actual absolute path to your project root on disk
+
+---
+
+## Build the Admin Panel
+
+The admin panel is a static Vue application that must be compiled before Nginx can serve it. The build command differs by topology:
+
+<Tabs>
+  <Tab title="Separate Domains">
+    ```bash
+    # From the project root
+    cd admin
+    pnpm build:prod
+    ```
+
+    Output is written to `admin/dist/`. Nginx will serve this directory directly from `admin.yourdomain.com`.
+  </Tab>
+  <Tab title="Shared Domain">
+    ```bash
+    # From the project root
+    cd admin
+    pnpm build:sigle
+    ```
+
+    This build variant sets the correct base path for serving the admin panel under `/admin`. Output is written to `admin/dist/`.
+  </Tab>
+</Tabs>
+
+---
+
+## Nginx Configuration
+
+<Tabs>
+  <Tab title="Separate Domains">
+    With the separate-domain topology, the public site and the admin panel each get their own `server` block. The public site proxies all traffic to the Node.js server; the admin panel is served as static files with only the `/api/` path proxied back to Node.js.
+
+    Create or edit `/etc/nginx/sites-available/nodeforge` with the following content:
+
+    ```nginx
+    # Public site — yourdomain.com
+    server {
+        listen 80;
+        server_name yourdomain.com;
+
+        # Proxy all public requests to the Nuxt server
+        location / {
+            proxy_pass         http://127.0.0.1:3000/;
+            proxy_http_version 1.1;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection 'upgrade';
+            proxy_set_header   Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        # Serve uploaded media directly from disk (more efficient than proxying)
+        location /uploads {
+            alias /path/to/NodeForgeCMS/server/uploads;
+        }
+    }
+
+    # Admin panel — admin.yourdomain.com
+    server {
+        listen 80;
+        server_name admin.yourdomain.com;
+
+        # Serve the built admin SPA as static files
+        location / {
+            root  /path/to/NodeForgeCMS/admin/dist;
+            index index.html;
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Proxy API calls back to the Node.js server
+        location /api/ {
+            proxy_pass         http://127.0.0.1:3000/api/;
+            proxy_http_version 1.1;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection 'upgrade';
+            proxy_set_header   Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+    }
+    ```
+
+    Enable the config and reload Nginx:
+
+    ```bash
+    sudo ln -s /etc/nginx/sites-available/nodeforge /etc/nginx/sites-enabled/
+    sudo nginx -t          # verify no syntax errors
+    sudo systemctl reload nginx
+    ```
+  </Tab>
+  <Tab title="Shared Domain">
+    With the shared-domain topology, a single `server` block handles everything. The root proxies to the Node.js server; `/admin` serves the static admin SPA from disk; and `/uploads` serves uploaded media directly.
+
+    Create or edit `/etc/nginx/sites-available/nodeforge` with the following content:
+
+    ```nginx
+    # Unified server — yourdomain.com
+    server {
+        listen 80;
+        server_name yourdomain.com;
+
+        # Proxy all public site requests to the Nuxt server
+        location / {
+            proxy_pass         http://127.0.0.1:3000/;
+            proxy_http_version 1.1;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection 'upgrade';
+            proxy_set_header   Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        # Serve uploaded media directly from disk
+        location /uploads {
+            alias /path/to/NodeForgeCMS/server/uploads;
+        }
+
+        # Serve the built admin SPA at /admin
+        location /admin {
+            alias   /path/to/NodeForgeCMS/admin/dist;
+            index   index.html index.htm;
+            try_files $uri $uri/ /admin/index.html;
+
+            # Disable caching for the admin panel to ensure the latest build is always served
+            expires -1;
+            add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate";
+        }
+    }
+    ```
+
+    Enable the config and reload Nginx:
+
+    ```bash
+    sudo ln -s /etc/nginx/sites-available/nodeforge /etc/nginx/sites-enabled/
+    sudo nginx -t          # verify no syntax errors
+    sudo systemctl reload nginx
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Enable HTTPS with Let's Encrypt
+
+<Tip>
+  **Always run HTTPS in production.** Certbot can automatically obtain a free TLS certificate from Let's Encrypt and update your Nginx configuration in one command:
+
+  ```bash
+  # Install Certbot
+  sudo apt install certbot python3-certbot-nginx
+
+  # Obtain and install a certificate (separate domains — run once per domain)
+  sudo certbot --nginx -d yourdomain.com
+  sudo certbot --nginx -d admin.yourdomain.com   # separate-domain topology only
+
+  # Obtain and install a certificate (shared domain)
+  sudo certbot --nginx -d yourdomain.com
+  ```
+
+  Certbot automatically modifies your Nginx config to listen on port 443 and sets up an HTTP → HTTPS redirect. Certificates renew automatically via a systemd timer or cron job — verify with `sudo certbot renew --dry-run`.
+</Tip>
+
+---
+
+## Starting the Node.js Server with PM2
+
+Nginx proxies to a Node.js process on port 3000. Use PM2 to manage that process:
+
+```bash
+# Install PM2 globally
+npm install -g pm2
+
+# Start the NodeForgeCMS server
+cd /path/to/NodeForgeCMS/server
+pm2 start ecosystem.config.js --env production
+
+# Save the process list so it restarts on reboot
+pm2 save
+pm2 startup
+```
+
+If the project doesn't include an `ecosystem.config.js`, start the server directly:
+
+```bash
+pm2 start "node index.js" --name nodeforge-server
+pm2 save
+pm2 startup
+```
+
+Useful PM2 commands:
+
+| Task | Command |
+|---|---|
+| View running processes | `pm2 list` |
+| Stream live logs | `pm2 logs nodeforge-server` |
+| Restart the server | `pm2 restart nodeforge-server` |
+| Zero-downtime reload | `pm2 reload nodeforge-server` |
+| Stop the server | `pm2 stop nodeforge-server` |

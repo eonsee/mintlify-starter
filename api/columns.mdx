@@ -1,0 +1,236 @@
+---
+title: "Columns API — Manage Content Structure in NodeForgeCMS"
+sidebarTitle: "Columns"
+description: "REST endpoints for listing, retrieving, creating, updating, and deleting content columns. GET endpoints are public; write operations require a Bearer token."
+---
+
+Columns are the top-level structural units of a NodeForgeCMS site. Every piece of content lives inside a column, which maps directly to a navigational section — think "Blog", "About Us", or "Products". Each column has its own URL key, language setting, display order, and SEO metadata, making them the primary way you organise and expose content to visitors. Before you can publish articles, you need at least one column to assign them to.
+
+---
+
+## List Columns
+
+<api-endpoint method="GET" path="/api/columns" />
+
+Returns all columns for the site. This is a **public endpoint** — no authentication is required.
+
+```http
+GET /api/columns
+```
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": [
+    {
+      "id": 1,
+      "name": "About Us",
+      "urlkey": "about",
+      "sort": 1,
+      "lang": "en",
+      "seoTitle": "About Our Company",
+      "seoDescription": "Learn about our team and mission"
+    }
+  ],
+  "message": "success"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | number | Unique column identifier |
+| `name` | string | Display name shown in navigation |
+| `urlkey` | string | URL-safe path segment (e.g. `/about`) |
+| `sort` | number | Display order — lower numbers appear first |
+| `lang` | string | Language code (e.g. `en`, `zh`) |
+| `seoTitle` | string | SEO meta title for the column page |
+| `seoDescription` | string | SEO meta description for the column page |
+
+---
+
+## Get Column by URL Key
+
+<api-endpoint method="GET" path="/api/columns/:urlkey" />
+
+Returns a single column identified by its unique URL key. This is a **public endpoint** — no authentication is required.
+
+```http
+GET /api/columns/about
+```
+
+### Path Parameters
+
+<ParamField path="urlkey" type="string" required>
+  The column's unique URL key (e.g. `about`, `blog`). This is the same value set in the `urlkey` field when the column was created.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": 1,
+    "name": "About Us",
+    "urlkey": "about",
+    "sort": 1,
+    "lang": "en",
+    "seoTitle": "About Our Company",
+    "seoDescription": "Learn about our team and mission"
+  },
+  "message": "success"
+}
+```
+
+---
+
+## Create Column
+
+<api-endpoint method="POST" path="/api/columns" />
+
+Creates a new column. **Requires a valid Bearer token.**
+
+```http
+POST /api/columns
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Blog",
+  "urlkey": "blog",
+  "lang": "en",
+  "sort": 5,
+  "seoTitle": "Our Blog",
+  "seoDescription": "Latest news and updates"
+}
+```
+
+### Request Body
+
+<ParamField body="name" type="string" required>
+  Display name for the column. Shown in navigation menus and column listings.
+</ParamField>
+
+<ParamField body="urlkey" type="string" required>
+  URL-safe path segment used to identify the column in routes (e.g. `blog`, `about-us`). Must be unique across all columns.
+</ParamField>
+
+<ParamField body="lang" type="string" required>
+  Language code for this column (e.g. `en`, `zh`, `fr`). Used to serve locale-specific content.
+</ParamField>
+
+<ParamField body="sort" type="number">
+  Display order relative to other columns. Lower numbers appear first. Defaults to the end of the list if omitted.
+</ParamField>
+
+<ParamField body="seoTitle" type="string">
+  SEO meta title rendered in `<title>` for the column's landing page.
+</ParamField>
+
+<ParamField body="seoDescription" type="string">
+  SEO meta description rendered in `<meta name="description">` for the column's landing page.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": 5,
+    "name": "Blog",
+    "urlkey": "blog",
+    "sort": 5,
+    "lang": "en",
+    "seoTitle": "Our Blog",
+    "seoDescription": "Latest news and updates"
+  },
+  "message": "success"
+}
+```
+
+---
+
+## Update Column
+
+<api-endpoint method="PUT" path="/api/columns/:id" />
+
+Updates an existing column by its numeric ID. **Requires a valid Bearer token.**
+
+```http
+PUT /api/columns/5
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Company Blog",
+  "urlkey": "blog",
+  "lang": "en",
+  "sort": 3,
+  "seoTitle": "NodeForgeCMS Blog",
+  "seoDescription": "Tips, updates, and deep dives from our team"
+}
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The numeric ID of the column to update.
+</ParamField>
+
+### Request Body
+
+Accepts the same fields as [Create Column](#create-column). Supply only the fields you want to change — all fields will be replaced with the values provided.
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": {
+    "id": 5,
+    "name": "Company Blog",
+    "urlkey": "blog",
+    "sort": 3,
+    "lang": "en",
+    "seoTitle": "NodeForgeCMS Blog",
+    "seoDescription": "Tips, updates, and deep dives from our team"
+  },
+  "message": "success"
+}
+```
+
+---
+
+## Delete Column
+
+<api-endpoint method="DELETE" path="/api/columns/:id" />
+
+Permanently deletes a column by its numeric ID. **Requires a valid Bearer token.**
+
+```http
+DELETE /api/columns/5
+Authorization: Bearer YOUR_TOKEN
+```
+
+### Path Parameters
+
+<ParamField path="id" type="number" required>
+  The numeric ID of the column to delete.
+</ParamField>
+
+### Response
+
+```json
+{
+  "code": 200,
+  "data": null,
+  "message": "success"
+}
+```
+
+<Warning>
+  Deleting a column **does not** delete the articles assigned to it. Those articles remain in the database but become unassigned — they will no longer appear in column-filtered queries until reassigned to another column via the [Articles API](/api/articles). Review and reassign orphaned articles before deleting a column in production.
+</Warning>

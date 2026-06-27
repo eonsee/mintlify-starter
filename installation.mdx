@@ -1,0 +1,194 @@
+---
+title: "Install NodeForgeCMS: Full Setup Guide"
+sidebarTitle: "Installation"
+description: "Complete installation guide for NodeForgeCMS covering prerequisites, environment configuration, database setup, and first run."
+---
+
+This guide walks you through a complete NodeForgeCMS installation from scratch. Whether you're setting up a local development environment or preparing a production server, follow these steps in order to get a fully functional instance running with the backend, frontend, and admin panel all properly configured.
+
+## Prerequisites
+
+NodeForgeCMS depends on the following software. Install and verify each before proceeding.
+
+| Requirement | Minimum Version | Notes |
+| ----------- | --------------- | ----- |
+| **Node.js** | 20.x            | LTS recommended. Use [nvm](https://github.com/nvm-sh/nvm) to manage versions. |
+| **MySQL**   | 8.x             | Ensure the service is running and you have a user with CREATE DATABASE privileges. |
+| **Redis**   | 7.x             | Used for session and cache storage. Must be accessible on the configured host/port. |
+| **pnpm**    | Latest          | Install globally with `npm install -g pnpm` if not already present. |
+
+## Project Structure
+
+NodeForgeCMS ships as a monorepo with two primary packages:
+
+```
+node-forge-cms/
+├── server/   # Nuxt4 application — backend API, SSR/SSG frontend, and media handling
+└── admin/    # Vue 3 admin panel — content editing, user management, and site configuration
+```
+
+- **`server/`** — Contains the Nuxt4 application that powers both the public-facing frontend (SSR/SSG) and the RESTful API. All CMS logic, routing, and data access lives here.
+- **`admin/`** — A standalone Vue 3 single-page application for site administration. It communicates with the server API and can be deployed on the same domain or a separate one.
+
+## Environment Configuration
+
+All runtime configuration for the server is managed through a `.env` file in the `server/` directory. Copy the example file and edit it for your environment:
+
+```bash
+cp server/.env.example server/.env
+```
+
+Below is the full `.env` file with explanations for each variable group.
+
+```ini server/.env
+# ─── Database ────────────────────────────────────────────────
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=your_password
+DATABASE_HOST=127.0.0.1
+DATABASE_PORT=3306
+DATABASE_DB=node_forge_cms
+
+# ─── Authentication ──────────────────────────────────────────
+JWT_SECRET=your_secret_key
+
+# ─── Redis ───────────────────────────────────────────────────
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_DB=5
+
+# ─── Server ──────────────────────────────────────────────────
+SERVER_HOST=http://127.0.0.1:3000
+IMG_HOST=http://127.0.0.1:3000
+
+# ─── Email (optional — used for contact forms) ───────────────
+FORM_USER_EMAIL=
+FORM_USER_EMAIL_PASSWORD=
+USER_EMAIL_SERVICE=QQ
+```
+
+**Variable reference:**
+
+- **`DATABASE_*`** — Connection details for your MySQL 8 instance. `DATABASE_DB` must match the name of the database you create in the next step.
+- **`JWT_SECRET`** — A long, random string used to sign authentication tokens. Use a cryptographically secure value in production (e.g., `openssl rand -hex 64`).
+- **`REDIS_*`** — Connection details for Redis. `REDIS_DB` is the logical Redis database index (0–15). Using a non-default index avoids collisions with other applications.
+- **`SERVER_HOST`** — The publicly accessible base URL of the server. Used for generating absolute URLs in API responses and emails.
+- **`IMG_HOST`** — The base URL used to prefix uploaded media file URLs. In most deployments this matches `SERVER_HOST`.
+- **`FORM_USER_EMAIL` / `FORM_USER_EMAIL_PASSWORD`** — Credentials for the email account used to send contact form submissions. Leave blank to disable email sending.
+- **`USER_EMAIL_SERVICE`** — The email service provider. Defaults to `QQ` (QQ Mail SMTP). Change to match your provider if using a different service.
+
+<Note>
+  In production, never commit your `.env` file to version control. Add it to `.gitignore` and manage secrets through your deployment platform's secret management system.
+</Note>
+
+## Database Setup
+
+Create the `node_forge_cms` database in MySQL, then import the bundled schema and seed data:
+
+```bash
+# Create the database
+mysql -u root -p -e "CREATE DATABASE node_forge_cms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Import schema and seed data
+mysql -u root -p node_forge_cms < server/sql/node_forge_cms.sql
+```
+
+This imports all table definitions and inserts the default site configuration, including the initial admin user account.
+
+<Warning>
+  The default admin credentials are **username: `admin`** and **password: `admin123`**. You must change this password before deploying to any non-local environment. Failure to do so is a critical security risk.
+</Warning>
+
+## Installing Dependencies
+
+Install dependencies for both the `server/` and `admin/` packages. Each is a self-contained Node.js project and must be installed separately.
+
+<CodeGroup>
+
+```bash pnpm (recommended)
+# Server dependencies
+cd server && pnpm install
+
+# Admin dependencies
+cd ../admin && pnpm install
+```
+
+```bash npm
+# Server dependencies
+cd server && npm install
+
+# Admin dependencies
+cd ../admin && npm install
+```
+
+```bash yarn
+# Server dependencies
+cd server && yarn
+
+# Admin dependencies
+cd ../admin && yarn
+```
+
+</CodeGroup>
+
+## Starting the Application
+
+### Development Mode
+
+Development mode enables hot-module replacement, detailed error output, and source maps.
+
+Start the server (available at **http://localhost:3000**):
+
+```bash
+cd server && pnpm dev
+```
+
+Start the admin panel in a separate terminal (available at **http://localhost:4000**):
+
+```bash
+cd admin && pnpm dev
+```
+
+### Production Build and Deployment
+
+**Server**
+
+Build the Nuxt4 server application and start it with PM2:
+
+```bash
+# Build the server
+cd server && pnpm build
+
+# Start with PM2 (uses the included PM2 config)
+pm2 start pm2.config.cjs
+```
+
+PM2 will manage the Node.js process, handle restarts on crash, and optionally persist the process across server reboots (`pm2 save` + `pm2 startup`).
+
+**Admin Panel**
+
+The admin panel has two build targets depending on your deployment topology:
+
+<CodeGroup>
+
+```bash Separate domain (recommended for production)
+# Build admin for deployment on its own domain or subdomain
+# e.g., admin.yourdomain.com
+cd admin && pnpm build:prod
+```
+
+```bash Shared domain (same domain as server)
+# Build admin as a sub-path of the main site
+# e.g., yourdomain.com/admin
+cd admin && pnpm build:sigle
+```
+
+</CodeGroup>
+
+After building, deploy the contents of the `admin/dist/` directory to your web server or static hosting of choice and configure your reverse proxy (e.g., Nginx) accordingly.
+
+**Summary of URLs**
+
+| Service       | Development              | Production (example)        |
+| ------------- | ------------------------ | ----------------------------|
+| Frontend/API  | http://localhost:3000    | https://yourdomain.com      |
+| Admin Panel   | http://localhost:4000    | https://admin.yourdomain.com |

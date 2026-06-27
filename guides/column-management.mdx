@@ -1,0 +1,117 @@
+---
+title: "Create and Configure Columns in NodeForgeCMS"
+sidebarTitle: "Column Management"
+description: "Set up content columns with custom URL paths to structure your site navigation and organize articles by topic or section."
+---
+
+Columns are the primary structural unit of NodeForgeCMS. Think of them as the top-level sections of your website — each column defines a named content area with its own URL path, and every article you publish is assigned to at least one column. Your column structure directly shapes your site navigation, URL scheme, and how visitors discover content. Getting columns right before you start publishing saves significant reorganization work later.
+
+## Creating a New Column
+
+<Steps>
+  <Step title="Open Column Management">
+    Log in to the admin panel and click **Column Management** in the left-hand sidebar. You will see a list of all existing columns with their names, URL keys, and article counts.
+  </Step>
+  <Step title="Start a new column">
+    Click the **+ New Column** button in the top-right corner. The column creation form opens.
+  </Step>
+  <Step title="Set the column name">
+    Enter a human-readable **Name** for the column (e.g., *Company News*, *Product Updates*, *Support Articles*). This name appears in the admin interface and can be used as the navigation label on your public site.
+  </Step>
+  <Step title="Set the URL key">
+    Enter a **URL Key** (also called `urlkey`) for the column. This becomes the path segment in your site's URLs — for example, a URL key of `company-news` produces URLs like `https://yoursite.com/company-news/article-title`.
+
+    URL key rules:
+    - Lowercase letters only (`a–z`)
+    - Numbers are allowed (`0–9`)
+    - Hyphens are allowed as word separators (`-`)
+    - No spaces, underscores, or special characters
+    - Must be unique — no two columns can share the same URL key
+    - Keep it short and descriptive (2–4 words)
+  </Step>
+  <Step title="Add SEO metadata (optional)">
+    Expand the **SEO Settings** section and enter a **Meta Title** and **Meta Description** specific to this column. These are used on the column's index page (the listing page that shows all articles in the column) and help search engines understand the section's purpose.
+  </Step>
+  <Step title="Save the column">
+    Click **Create Column**. The column is immediately available in the article editor's **Column** dropdown.
+  </Step>
+</Steps>
+
+## URL Key Rules and Best Practices
+
+The URL key is permanent in the sense that changing it after articles have been indexed by search engines will break existing links and hurt your SEO rankings. Choose URL keys carefully before publishing content.
+
+| Good URL key | Avoid |
+|---|---|
+| `company-news` | `Company News` (spaces) |
+| `product-updates` | `product_updates` (underscores) |
+| `support` | `Support!` (special characters) |
+| `en-blog` | `blog 2024` (space + number) |
+
+If you absolutely must rename a URL key after launch, set up a server-level redirect from the old path to the new one to preserve link equity.
+
+## Assigning Articles to Columns
+
+Every article must belong to a column. You assign the column when creating or editing an article:
+
+1. Open or create an article in **Articles**.
+2. Find the **Column** dropdown in the article settings panel.
+3. Select the target column from the list.
+4. Save the article.
+
+An article can only be assigned to one column at a time. If you need an article to appear in multiple sections, consider duplicating it or using tags (if your theme supports them).
+
+## Reordering Columns
+
+The order of columns in Column Management controls the order they appear in your site's navigation menu. To reorder:
+
+1. Go to **Column Management**.
+2. Click and drag the row handles (the grip icon on the left of each row) to rearrange columns.
+3. Release to drop the column in its new position.
+
+The navigation order updates immediately — no save button required. Refresh your public site to see the change reflected in the menu.
+
+## Per-Column SEO Settings
+
+Each column has its own independent SEO metadata for its index/listing page:
+
+- **Meta Title** — the `<title>` tag for the column's listing page.
+- **Meta Description** — the description shown in search engine result snippets.
+
+To edit these:
+
+1. Click the **Edit** icon next to any column in the list.
+2. Scroll to the **SEO Settings** section.
+3. Update the title and description.
+4. Click **Save Changes**.
+
+Good per-column SEO metadata helps search engines understand the scope of each section and can significantly improve organic traffic to your content categories.
+
+## Deleting a Column
+
+<Warning>
+  Deleting a column does **not** delete the articles assigned to it. Articles become unlinked — they still exist in the database and will appear in your article list, but they will no longer be accessible from the public site via that column's URL. Before deleting a column, reassign its articles to another column or delete them individually if they are no longer needed.
+</Warning>
+
+To delete a column:
+
+1. Go to **Column Management**.
+2. Click the **Delete** (trash) icon on the column's row.
+3. Confirm the deletion in the dialog box.
+
+The column is removed and its URL path is freed up for reuse.
+
+## Example: Corporate Site Structure
+
+A typical corporate website built on NodeForgeCMS might use the following column structure:
+
+| Column Name | URL Key | Purpose |
+|---|---|---|
+| About Us | `about` | Company story, team, values |
+| Products | `products` | Product descriptions and specs |
+| News | `news` | Press releases and announcements |
+| Blog | `blog` | Thought leadership and articles |
+| Support | `support` | FAQs, guides, troubleshooting |
+| Careers | `careers` | Job listings and culture content |
+
+This maps to clean public URLs like `https://acmecorp.com/news/`, `https://acmecorp.com/blog/`, and `https://acmecorp.com/support/` — intuitive for visitors and well-structured for search engines.

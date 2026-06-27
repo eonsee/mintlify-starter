@@ -1,0 +1,104 @@
+---
+title: "Manage User Roles and Permissions in NodeForgeCMS"
+sidebarTitle: "Permissions"
+description: "Control who can access what in NodeForgeCMS with role-based access control, admin user management, and operation audit logs."
+---
+
+NodeForgeCMS uses a role-based access control (RBAC) system to ensure the right people have access to the right parts of your platform — and nothing more. Rather than configuring permissions for each individual user, you assign users to roles that carry predefined permission sets. This makes it straightforward to onboard new team members, enforce the principle of least privilege, and maintain a clean audit trail of who changed what and when.
+
+<Warning>
+  NodeForgeCMS ships with a default administrator account using the credentials `admin` / `admin123`. **Change this password immediately after installation** — before connecting the server to the internet or sharing access with any team member. To update the password, log in, navigate to **Account Settings → Change Password**, and set a strong, unique password. Leaving default credentials in place exposes your entire CMS — and everything connected to it — to trivial unauthorized access.
+</Warning>
+
+## Role-Based Access Control Overview
+
+In an RBAC system, permissions are attached to *roles*, and roles are assigned to *users*. When you need to adjust what a group of users can do, you update the role once rather than editing every individual account.
+
+NodeForgeCMS ships with a set of built-in roles organized around the typical responsibilities in a content team:
+
+| Role | Access Level | Typical Use |
+|---|---|---|
+| **Super Admin** | Unrestricted — all features, settings, and user management | Platform owner, lead developer |
+| **Admin** | Full content and configuration access, limited user management | Site manager, senior editor |
+| **Content Editor** | Create, edit, and publish content; access media library | Copywriters, journalists, marketing team |
+| **Viewer** | Read-only access to the admin panel | Stakeholders, auditors, clients reviewing drafts |
+
+Depending on your installation and version, additional custom roles may be configurable from the admin panel.
+
+## The Default Admin Role
+
+The default `admin` account created at installation is assigned the **Super Admin** role, which grants unrestricted access to every feature in the system — including user management, system settings, language configuration, and all content operations.
+
+Use the Super Admin role sparingly. In a team environment, most day-to-day users should be assigned the lowest-privilege role that still lets them do their job effectively. Reserve Super Admin for the platform owner and one or two trusted backup accounts.
+
+## Creating Additional Admin Users
+
+As your team grows, create individual accounts for each person rather than sharing the default admin login.
+
+1. Log in to the admin panel with an account that has user management permissions.
+2. Navigate to **User Management** in the left-hand sidebar (under **Settings** on some versions).
+3. Click **+ New User**.
+4. Fill in the user details:
+   - **Username** — used for login; lowercase, no spaces.
+   - **Email** — used for notifications and password recovery.
+   - **Password** — set a temporary password and ask the user to change it on first login.
+   - **Role** — select the appropriate role from the dropdown.
+5. Click **Create User**.
+
+The new user can now log in immediately with the credentials you provided. Advise them to change their password right away via **Account Settings → Change Password**.
+
+## Permission Levels in Practice
+
+Here is how typical team members map to roles in a real-world NodeForgeCMS deployment:
+
+**Content Editor**
+- Can create, edit, and delete articles
+- Can upload and manage media files
+- Can set articles to Draft or Published
+- Cannot access system settings, language configuration, or user management
+
+**Admin**
+- Everything a Content Editor can do
+- Can manage columns and site structure
+- Can configure SEO settings
+- Can view operation logs
+- Can create Content Editor accounts (but not other Admin accounts)
+
+**Super Admin**
+- Everything an Admin can do
+- Can manage all user accounts including other Admins
+- Can modify system-level settings (language, API keys, domain configuration)
+- Can view and export full audit logs
+
+## Operation Audit Logs
+
+NodeForgeCMS maintains a detailed log of all significant actions taken within the admin panel. The audit log is your safety net — if something on the site changes unexpectedly, you can trace exactly who made the change and when.
+
+**What the audit log tracks:**
+
+- Article create, edit, publish, and delete events
+- Column creation and modification
+- User account creation, role changes, and password resets
+- System setting changes
+- Login and logout events (including failed login attempts)
+- Media uploads and deletions
+
+**Accessing the audit log:**
+
+1. Navigate to **Settings → Operation Logs** (or **Audit Log** depending on your version).
+2. Use the date range filter to narrow results to a specific period.
+3. Filter by **User** to see all actions taken by a specific account.
+4. Filter by **Action Type** to focus on a particular category (e.g., all publish events).
+
+Logs are read-only — they cannot be edited or deleted through the admin UI, which preserves their integrity as a compliance and accountability record.
+
+## Best Practices for User and Permission Management
+
+Following these practices keeps your NodeForgeCMS installation secure and your team accountable:
+
+- **One account per person.** Never share admin credentials between team members. Individual accounts mean the audit log is meaningful — you can see exactly who did what.
+- **Use the lowest privilege that works.** A copywriter does not need Super Admin access. Assign Content Editor and upgrade only if there is a clear need.
+- **Rotate passwords regularly.** Especially for admin-level accounts, change passwords every 90 days or whenever a team member leaves the organization.
+- **Disable accounts promptly when people leave.** Go to **User Management**, find the user's account, and either disable or delete it the same day someone leaves the team.
+- **Review the audit log periodically.** A monthly review of the operation log helps catch mistakes, unauthorized changes, or unusual activity before they become bigger problems.
+- **Restrict Super Admin accounts.** Aim to have no more than two or three Super Admin accounts in any production environment. Fewer privileged accounts means a smaller attack surface.

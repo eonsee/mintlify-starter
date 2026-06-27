@@ -1,0 +1,59 @@
+---
+title: "NodeForgeCMS Frequently Asked Questions"
+sidebarTitle: "FAQ"
+description: "Answers to common questions about NodeForgeCMS installation, configuration, multilingual content, SEO, and deployment."
+---
+
+NodeForgeCMS is built to be flexible and production-ready, but it's natural to have questions as you get started or scale your deployment. This FAQ covers the most common topics raised by developers and content teams — from system requirements and Redis configuration to multilingual support, headless API usage, and backups. If you don't find what you need here, check the other sections of the documentation or open a support ticket.
+
+<AccordionGroup>
+
+  <Accordion title="What are the system requirements to run NodeForgeCMS?">
+    NodeForgeCMS requires **Node.js 20.x**, **MySQL 8.x**, and **Redis 7** to run correctly. Your server should have at least 1 GB of RAM for development and 2 GB or more recommended for production workloads. A modern Linux distribution (Ubuntu 22.04 LTS or Debian 12 are recommended) is the most commonly tested environment. Windows and macOS are supported for local development only and are not recommended for production deployments.
+  </Accordion>
+
+  <Accordion title="Can I use NodeForgeCMS without Redis?">
+    Redis is required for session management, caching, and the real-time features of NodeForgeCMS — it cannot be fully disabled. However, if you are running a lightweight local development environment, you can configure Redis to operate in a minimal capacity by pointing `REDIS_HOST` to a local instance and reducing cache TTL values. For production, a dedicated Redis 7 instance is strongly recommended to ensure performance and session reliability. Skipping Redis entirely will cause authentication and caching subsystems to fail at startup.
+  </Accordion>
+
+  <Accordion title="How do I change the admin login credentials?">
+    The default administrator credentials are **username: `admin`** and **password: `admin123`**. You should change these immediately after your first login by navigating to **Admin Panel → Account Settings → Change Password**. You can also update the admin email address from the same screen. If you forget your credentials after changing them, see the [Troubleshooting guide](/troubleshooting) for instructions on resetting credentials directly in MySQL.
+  </Accordion>
+
+  <Accordion title="How many languages does NodeForgeCMS support?">
+    NodeForgeCMS ships with support for **21 languages** out of the box, covering a wide range of global locales including English, Simplified Chinese, Traditional Chinese, French, German, Spanish, Japanese, Korean, and more. Each language gets its own localized URL routing (e.g., `/en/`, `/zh/`, `/fr/`) handled automatically by the built-in i18n layer. You can enable or disable individual languages from **Admin Panel → Settings → Languages**, and content editors can create per-language versions of any article or page.
+  </Accordion>
+
+  <Accordion title="Can I deploy NodeForgeCMS on shared hosting?">
+    NodeForgeCMS is **not compatible with traditional shared hosting** environments. It requires persistent Node.js processes, a MySQL 8.x database, and a Redis instance — none of which are typically available on shared hosting plans. For production, use a VPS, a dedicated server, or a cloud provider such as AWS, DigitalOcean, or Vultr. Docker-based deployments are also fully supported and are the recommended path for containerized or cloud-native infrastructure.
+  </Accordion>
+
+  <Accordion title="How do I add a new content column?">
+    Content columns (categories/sections) are managed from **Admin Panel → Content Structure → Columns**. Click **Add Column**, fill in the column name, slug, parent column (if it is a sub-column), SEO metadata, and choose which languages it should be available in. Once saved, the column will appear in the navigation tree and editors can begin assigning articles to it. Remember to publish the column — drafts are not visible on the public site.
+  </Accordion>
+
+  <Accordion title="What's the difference between SSR and SSG mode?">
+    **SSR (Server-Side Rendering)** renders each page on demand at request time using the Node.js server. This is ideal for dynamic content, personalisation, and sites that update frequently, and it ensures search engines always receive fresh HTML. **SSG (Static Site Generation)** pre-renders all pages at build time using `pnpm run generate`, producing a fully static output that can be served from a CDN with no Node.js runtime required. SSG offers the best performance and lowest hosting cost for content-heavy sites that don't change in real time, but requires a rebuild and redeploy whenever content changes.
+  </Accordion>
+
+  <Accordion title="How does AI search work — is my content sent to a third-party service?">
+    NodeForgeCMS's AI-powered search indexes your content locally and runs semantic similarity queries against that local index — **your content is not sent to any external third-party AI service** by default. The search engine builds embeddings from your articles and stores them in your own MySQL database. If you optionally integrate an external LLM provider (e.g., for summarisation or Q&A features), that integration must be explicitly configured in `.env` and you remain in full control of which data is transmitted. Always review your `.env` AI settings to confirm the active provider.
+  </Accordion>
+
+  <Accordion title="Can I use NodeForgeCMS as a headless CMS?">
+    Yes — NodeForgeCMS exposes a full **RESTful API** from the Node.js backend (default port `3000`) that you can query from any frontend framework, mobile app, or third-party integration. All content types, columns, media, and configuration endpoints are available via the API. Authentication uses JWT bearer tokens. This makes NodeForgeCMS a capable headless CMS while still offering the built-in Nuxt4 frontend for teams that want an all-in-one solution. API documentation is available under **Admin Panel → Developer → API Reference**.
+  </Accordion>
+
+  <Accordion title="How do I back up my content?">
+    Your content is stored in MySQL, so standard MySQL dump tools work perfectly. Run `mysqldump -u <user> -p <database_name> > backup.sql` on a schedule to export a full snapshot. Media files (images, attachments) are stored in the `/uploads` directory on your server and should be included in your file-system backup or synced to object storage (e.g., S3). For automated backups, configure a cron job or use your hosting provider's snapshot feature. It is recommended to test restoration from your backups regularly to ensure integrity.
+  </Accordion>
+
+  <Accordion title="How do I update NodeForgeCMS to a new version?">
+    Before updating, **back up your database and `/uploads` directory**. Pull the latest code from the repository (or download the new release archive), then run `pnpm install` in both the root and `admin/` directories to update dependencies. Review the release notes for any database migration scripts — if migrations are included, run them against your MySQL instance before restarting the server. Finally, restart the Node.js API server and the Nuxt frontend. Zero-downtime updates can be achieved using a process manager like PM2 with cluster mode enabled.
+  </Accordion>
+
+  <Accordion title="What email services are supported for contact forms?">
+    NodeForgeCMS supports **Gmail (via OAuth2 or App Password)** and **QQ Mail** as built-in email providers for contact form notifications and system alerts. SMTP configuration is set in your `.env` file using the `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, and `MAIL_PASS` variables. Any standard SMTP-compatible service (SendGrid, Mailgun, AWS SES, etc.) can also be used by pointing the SMTP variables to the provider's server. For Gmail, ensure you use an App Password if two-factor authentication is enabled on the sending account.
+  </Accordion>
+
+</AccordionGroup>

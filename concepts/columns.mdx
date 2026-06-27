@@ -1,0 +1,87 @@
+---
+title: "Content Columns: Flexible Site Structure in NodeForgeCMS"
+sidebarTitle: "Columns"
+description: "Columns are NodeForgeCMS's core organizational unit — configure custom URL paths, link content, and structure your site without touching code."
+---
+
+In NodeForgeCMS, a **Column** is the foundational building block of your site's structure. Rather than hard-coding navigation sections or URL paths into your frontend templates, Columns let you define the entire shape of your website — its sections, categories, and content areas — from the admin panel. Add a new section to your site, rename a category, or reorganize your navigation hierarchy: none of it requires a developer or a code deployment. Columns give editorial and marketing teams genuine ownership over site structure.
+
+## What Is a Column?
+
+A Column represents a top-level organizational unit of your website. Think of it as a named section or category that groups related content together and gives that content a home in your URL structure. Every page and article in NodeForgeCMS belongs to a Column, and that relationship determines where the content lives, how it is navigated to, and how it appears in your site's menus.
+
+Common examples of Columns on real sites include:
+
+- **About Us** — company background, team pages, mission statements
+- **Products** — product listings, feature pages, pricing
+- **News** — press releases, blog posts, announcements
+- **Support** — FAQs, documentation, contact forms
+
+Columns can be nested to create sub-sections, allowing you to build multi-level navigation hierarchies that reflect the true complexity of your content — without ever opening a code editor.
+
+## URL Keys: Controlling Your Public URLs
+
+Every Column has a **URL key** (`urlkey`) — a short, human-readable slug that becomes part of the public-facing URL for all content within that Column. The URL key is the direct connection between your admin-side content structure and the URLs your visitors and search engines see.
+
+For example, a corporate site might be configured like this:
+
+| Column Name | URL Key | Resulting URL |
+|-------------|---------|---------------|
+| About Us | `about` | `yourdomain.com/about` |
+| Products | `products` | `yourdomain.com/products` |
+| News | `news` | `yourdomain.com/news` |
+| Support | `support` | `yourdomain.com/support` |
+
+An article titled "Our Story" placed in the **About Us** Column with a slug of `our-story` would be accessible at `yourdomain.com/about/our-story` — automatically, with no routing configuration required.
+
+<Tip>
+Use **lowercase letters, numbers, and hyphens** for URL keys. Avoid spaces, underscores, or special characters. Good URL keys are short, descriptive, and stable — changing a URL key after launch will break existing links and may hurt your search rankings unless you set up redirects.
+</Tip>
+
+## Decoupling Structure from Content
+
+One of the most powerful aspects of the Column system is that it decouples your site's *structure* from your site's *content* — and both from your *frontend code*.
+
+In a traditional CMS, adding a new site section often means:
+
+1. Creating a new route or template in code
+2. Deploying the code change
+3. Then populating the content
+
+With NodeForgeCMS Columns, steps 1 and 2 collapse into a single admin action. The frontend reads the Column configuration dynamically from the API, so a new Column created in the admin panel is immediately reflected in the navigation and routing without any code change. This is particularly valuable for:
+
+- **Rapid content launches** — spin up a new campaign section in minutes
+- **Seasonal restructuring** — add or hide sections without developer involvement
+- **A/B testing site structure** — create and disable Columns independently of frontend releases
+
+## Column Types and Their Relationship to Content
+
+Columns are not just folders — they carry configuration that shapes how content within them behaves. Depending on your setup, a Column can be configured to contain:
+
+- **Static pages** — single, standalone pages like "Contact Us" or "Privacy Policy"
+- **Article lists** — paginated collections of posts, press releases, or blog entries
+- **Product catalogs** — structured content with custom fields specific to your content model
+- **Mixed content** — a landing page at the Column root with child articles underneath
+
+This flexibility means you can model almost any site architecture — editorial blogs, product sites, corporate portals, knowledge bases — using the same Column abstraction, simply by configuring it differently for each section.
+
+## Practical Example: A Corporate Website
+
+Consider a mid-sized company building their corporate website on NodeForgeCMS. Their content team defines the following Column structure in the admin panel:
+
+```
+/ (Home)
+├── about          → About Us (static pages: Team, Mission, History)
+├── products       → Products (article list with product detail pages)
+├── news           → News & Press (article list, date-sorted)
+├── careers        → Careers (article list with job postings)
+└── contact        → Contact (static page with form)
+```
+
+Each of these is a Column with its own URL key, content type, and display configuration. The marketing team can add a new `partners` Column for a new initiative — complete with its own URL path and content — in the time it takes to fill out a short form in the admin panel.
+
+## Learn More
+
+<Tip>
+Ready to create and manage Columns in your project? The [Column Management guide](/guides/column-management) walks you through creating Columns, setting URL keys, nesting sub-columns, and assigning content — step by step.
+</Tip>

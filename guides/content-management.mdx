@@ -1,0 +1,84 @@
+---
+title: "Manage Content in NodeForgeCMS Admin Panel"
+sidebarTitle: "Content Management"
+description: "Create, edit, publish, and organize articles and pages through the NodeForgeCMS admin panel — no code required."
+---
+
+The NodeForgeCMS admin panel gives you full control over your site's content without writing a single line of code. From drafting articles to organizing media and managing publication states, everything you need is available through a clean, browser-based interface. This guide walks you through the complete content lifecycle — from logging in for the first time to publishing a polished, multilingual article.
+
+## Accessing the Admin Panel
+
+Open your browser and navigate to your admin URL:
+
+- **Local development:** `http://localhost:4000`
+- **Production:** `https://your-admin-domain.com` (or whatever domain you configured during setup)
+
+Enter your admin username and password on the login screen, then click **Sign In**. After a successful login you will land on the dashboard, which gives you a quick overview of recent activity, published content counts, and system status.
+
+<Warning>
+  The default credentials shipped with NodeForgeCMS are `admin` / `admin123`. Change your password immediately after your first login — navigate to **Account Settings → Change Password** before doing anything else. Leaving default credentials in place is a serious security risk, especially on a publicly accessible server.
+</Warning>
+
+## Creating a New Article
+
+NodeForgeCMS organizes all written content as *articles*. Whether you are publishing a blog post, a product page, or a support article, the process is the same.
+
+1. In the left-hand sidebar, click **Articles**.
+2. Click the **+ New Article** button in the top-right corner.
+3. Fill in the article fields:
+   - **Title** — the human-readable headline displayed on the page.
+   - **Body** — the main content area. The rich-text editor supports headings, lists, links, bold/italic formatting, and inline images.
+   - **Meta Title / Meta Description** — used by search engines. Keep the meta title under 60 characters and the description under 160 characters.
+4. In the **Column** dropdown, assign the article to a content column (e.g., *News*, *Products*, *Support*). Columns control where the article appears in your site navigation. See [Column Management](/guides/column-management) for details.
+5. Select the **Language** for this article from the language selector. If you have multiple languages enabled, each language version is stored as a separate entry.
+6. Set the publication status:
+   - Choose **Draft** to save the article privately while you continue working on it.
+   - Choose **Published** to make it immediately visible on the public site.
+7. Click **Save** (or **Publish** if you are ready to go live).
+
+## Editing Existing Content
+
+1. Navigate to **Articles** in the sidebar.
+2. Use the search bar or scroll through the list to find the article you want to update.
+3. Click the article title or the **Edit** (pencil) icon on the right side of the row.
+4. Make your changes in the editor.
+5. Click **Save Changes**. If the article was already published, the updated version goes live immediately.
+
+> **Tip:** Use the search bar and column/language filters at the top of the article list to quickly locate content on large sites with hundreds of entries.
+
+## Managing Media and Images
+
+NodeForgeCMS includes a built-in media library for uploading and organizing images and files.
+
+**Uploading a new image:**
+
+1. Click **Media Library** in the sidebar.
+2. Click **Upload** and select one or more files from your computer. Supported formats include JPEG, PNG, WebP, GIF, and SVG.
+3. Once uploaded, the file appears in the library grid with its URL automatically generated.
+
+**Inserting an image into an article:**
+
+1. While editing an article, place your cursor in the body where you want the image to appear.
+2. Click the **Image** icon in the rich-text editor toolbar.
+3. Select an existing file from the media library, or upload a new one inline.
+4. Add alt text describing the image — this is important for accessibility and SEO.
+5. Click **Insert**.
+
+You can also drag and drop images directly from your desktop into the article editor body, which uploads and inserts them in one step.
+
+## Publishing Workflow: Draft vs. Published
+
+Every article in NodeForgeCMS lives in one of two states:
+
+| State | Visibility | Use when… |
+|---|---|---|
+| **Draft** | Private — only visible to admin users | You are still writing, waiting for approval, or scheduling future content |
+| **Published** | Public — visible to all site visitors | Content is ready and approved for your audience |
+
+To change an article's state at any time, open the article editor, update the **Status** toggle at the top of the form, and click **Save**. You can also bulk-change status by selecting multiple articles in the list view and using the **Actions** dropdown.
+
+There is no separate "unpublish" button — simply switch a published article back to **Draft** to remove it from the public site instantly.
+
+<Tip>
+  NodeForgeCMS includes AI-powered translation so you can reach global audiences without manually rewriting content for every language. See the [AI Features guide](/guides/ai-features) to learn how to translate articles automatically from within the admin panel.
+</Tip>
